@@ -1,0 +1,17 @@
+authors:
+  - default_author
+
+contributors:
+  default_author:
+    name: "Developer Name"
+    email: "developer@example.com"
+    contact: "Developer Name <developer@example.com>"
+    author: "Developer Name <developer@example.com>"
+    start_year: 2025
+
+copyrights:
+  - contributors.default_author
+
+contacts:
+  - role: "Maintainer"
+    entity: contributors.default_author

@@ -1,0 +1,10 @@
+{#- scaffold-repo: { dest: "tests/test_main.py", updatable: false } -#}
+import unittest
+from {{ project_snake }} import __version__
+
+class TestMain(unittest.TestCase):
+    def test_version(self):
+        self.assertIsNotNone(__version__)
+
+if __name__ == '__main__':
+    unittest.main()

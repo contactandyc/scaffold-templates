@@ -1,0 +1,10 @@
+# ── Global Defaults for Python ──
+root:
+  stack: python/standard
+  language: Python
+
+# ── Local Project Config ──
+kind: local
+build_steps:
+  - ./build.sh clean
+  - ./build.sh install

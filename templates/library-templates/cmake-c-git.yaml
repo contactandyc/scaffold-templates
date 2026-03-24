@@ -1,17 +1,12 @@
-# ── Global Defaults ──
+# ── Global Defaults for External C/CMake ──
 root:
-  stack: c/cmake     # <-- The beautiful shorthand
+  stack: c/cmake
   cmake_min_version: "3.20"
-  c_standard: 23
+  c_standard: 17
   language: C
   pic: true
   need_libm: false
-  deps:
-    kind: library
-  tests:
-    kind: tests
 
-  # C-Specific Development Tools
   dev_packages:
     valgrind: true
     gdb: true
@@ -20,9 +15,9 @@ root:
     automake: true
     libtool: true
 
-# ── The Template Payload ──
+# ── The External Git Payload ──
 kind: git
-url: https://github.com/{{ github_project }}/{{ name }}.git
+url: https://github.com/{{ github_project | default('contactandyc') }}/{{ name }}.git
 shallow: false
 build_steps:
   - ./build.sh clean

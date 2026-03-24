@@ -1,0 +1,6 @@
+{#- scaffold-repo: { dest: "src/{{ project_snake }}/__init__.py", updatable: false } -#}
+"""
+{{ project_name }}
+{{ description | default('A dynamically scaffolded python project') }}
+"""
+__version__ = "{{ version | default('0.1.0') }}"

@@ -1,0 +1,15 @@
+{#- scaffold-repo: { dest: "include/{{ project_slug }}/{{ project_snake }}.h", updatable: false } -#}
+#ifndef _{{ project_snake|upper }}_H
+#define _{{ project_snake|upper }}_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+void {{ project_snake }}_hello(void);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif

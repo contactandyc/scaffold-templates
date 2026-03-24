@@ -1,0 +1,7 @@
+{#- scaffold-repo: { dest: "src/{{ project_snake }}.c", updatable: false } -#}
+#include "{{ project_slug }}/{{ project_snake }}.h"
+#include <stdio.h>
+
+void {{ project_snake }}_hello(void) {
+    printf("Hello from {{ project_name }}!\n");
+}
