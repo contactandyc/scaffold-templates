@@ -1,17 +1,23 @@
 authors:
-  - default_author
+  - andy_curtis
+
+license_profile: apache-2.0
 
 contributors:
-  default_author:
-    name: "Developer Name"
-    email: "developer@example.com"
-    contact: "Developer Name <developer@example.com>"
-    author: "Developer Name <developer@example.com>"
-    start_year: 2025
-
-copyrights:
-  - contributors.default_author
+  andy_curtis:
+    name: Andy Curtis
+    email: contactandyc@gmail.com
+    contact: "Andy Curtis <contactandyc@gmail.com>"
+    author: "Andy Curtis <contactandyc@gmail.com> linkedin.com/in/andycurtis github.com/contactandyc"
+    start_year: 1998
+  knode:
+    name: Knode.ai
+    website: https://www.knodeai.com/
+    contact: "Knode.ai"
+    full_entity: "Knode.ai — https://www.knodeai.com/"
+    start_year: 2024
+    end_year: 2025
 
 contacts:
   - role: "Maintainer"
-    entity: contributors.default_author
+    entity: contributors.andy_curtis
