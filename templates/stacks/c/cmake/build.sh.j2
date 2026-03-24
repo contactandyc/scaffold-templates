@@ -79,7 +79,7 @@ case "$COMMAND" in
 
     echo ""
     echo "--- Coverage summary (console) ---"
-    {% if kind == "header_only" %}
+    {% if kind | default('compiled') == "header_only" %}
     # Header-only: summarize from all test executables
     for exe in "$COV_BUILD_DIR"/tests/test_*; do
       if [ -x "$exe" ]; then

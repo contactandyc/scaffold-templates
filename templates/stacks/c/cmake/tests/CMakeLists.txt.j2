@@ -97,7 +97,7 @@ if(A_ENABLE_COVERAGE AND CMAKE_C_COMPILER_ID MATCHES "Clang")
       COMMENT "Merging coverage data"
     )
 
-    {% if kind == "header_only" %}
+    {% if kind | default('compiled') == "header_only" %}
     # For header-only, report coverage from all test executables
     foreach(tgt IN LISTS TEST_EXECUTABLES)
       add_custom_command(TARGET coverage_report POST_BUILD

@@ -7,7 +7,7 @@ project({{ project_snake }}
   LANGUAGES {{ language | default("C") }}
 )
 
-{%- if kind == "header_only" %}
+{%- if kind | default('compiled') == "header_only" %}
 
 # ── Header-only target ─────────────────────────────────────────────────────────
 add_library({{ project_snake }} INTERFACE)
