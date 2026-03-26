@@ -1,3 +1,5 @@
+kind: git
+
 init_prompts:
   - var: stack_type
     prompt: "Select Python build system:"

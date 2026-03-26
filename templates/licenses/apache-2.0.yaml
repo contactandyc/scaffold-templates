@@ -2,12 +2,13 @@ spdx: |
   {% for cp in copyrights %}
   SPDX-FileCopyrightText: {{ cp.year_span }} {{ cp.entity }}
   {% endfor %}
+  SPDX-License-Identifier: Apache-2.0
   {% if contacts %}
+
   {% for c in contacts %}
   {{ c.role }}: {{ c.entity }}
   {% endfor %}
   {% endif %}
-  SPDX-License-Identifier: Apache-2.0
 license: LICENSE
 license_canonical: resources/licenses/Apache-2.0.txt
 notice: |

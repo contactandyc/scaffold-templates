@@ -1,0 +1,15 @@
+includes:
+  - profiles/default
+
+contributors:
+  knode:
+    name: Knode.ai
+    website: https://www.knodeai.com/
+    contact: "Knode.ai"
+    full_entity: "Knode.ai — https://www.knodeai.com/"
+    start_year: 2024
+    end_year: 2025
+
+copyrights:
+  - contributors.andy_curtis
+  - contributors.knode

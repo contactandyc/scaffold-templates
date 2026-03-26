@@ -1,3 +1,29 @@
+# ── 1. Global Defaults for this Stack ──
+cmake_min_version: "3.20"
+language: C
+pic: true
+need_libm: false
+c_standard: 23
+profile: default
+
+dev_packages:
+  valgrind: true
+  gdb: true
+  perl: true
+  autoconf: true
+  automake: true
+  libtool: true
+
+# ── 2. Default Dependency/Build Behaviors ──
+kind: git
+url: https://github.com/{{ github_project | default('contactandyc') }}/{{ name }}.git
+shallow: false
+build_steps:
+  - ./build.sh clean
+  - ./build.sh install
+find_package: "{{ project_snake }} CONFIG REQUIRED"
+link: "{{ project_snake }}::{{ project_snake }}"
+
 init_prompts:
   - var: PREFIX
     prompt: "Where should built binaries and headers be installed?"

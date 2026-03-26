@@ -1,3 +1,9 @@
+kind: git
+
+build_steps:
+  - ./build.sh clean
+  - ./build.sh install
+
 # --- WORKSPACE LEVEL (Asked during --init or if the stack is missing) ---
 init_prompts:
   - var: PYTHON_VERSION
