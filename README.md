@@ -86,7 +86,7 @@ Instead of duplicating names, emails, and dates across your `copyrights` and `co
 When the engine sees a dot-notation string like `contributors.andy_curtis` in the `copyrights` or `contacts` arrays, it dynamically traverses your configuration dictionary to find that exact object. It then automatically:
 
 1.  Resolves the properties (like `name` and `full_entity`).
-2.  Calculates a dynamic `year_span` (e.g., `1998–2026`) using the entity's `start_year` and the project's current year (or `end_year` if specified).
+2.  Calculates a dynamic `year_span` (e.g., `1998–2026`) using the entity's `start_year` and the project's current year (or `end_year` if specified).  This will also consider the `date_created` in your project's local scaffold.yaml.
 3.  Injects the fully resolved dictionary into the Jinja context so your License templates can iterate over it cleanly (`{% for cp in copyrights %}`).
 
 -----
