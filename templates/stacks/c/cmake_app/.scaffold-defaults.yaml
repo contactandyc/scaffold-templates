@@ -1,0 +1,56 @@
+# ── 1. Global Defaults for this Stack ──
+cmake_min_version: "3.20"
+language: C
+profile: default
+cmake_base_url: "https://github.com/Kitware/CMake/releases/download"
+
+dev_packages:
+  valgrind: true
+  gdb: true
+  perl: true
+
+# ── 2. Default Dependency/Build Behaviors ──
+kind: git
+url: https://github.com/{{ github_project | default('contactandyc') }}/{{ name }}.git
+shallow: false
+build_steps:
+  - ./build.sh clean
+  - ./build.sh install
+
+# Note: Applications do not export find_package or link targets for other repos to consume.
+
+init_prompts:
+  - var: PREFIX
+    prompt: "Where should built binaries be installed?"
+    default: "./install"
+    options: ["./install", "/usr/local", "Custom (type it yourself)"]
+
+  - var: BUILD_TYPE
+    prompt: "Select default CMake build type:"
+    default: "Release"
+    options: ["Release", "Debug", "RelWithDebInfo", "MinSizeRel"]
+
+  - var: BUILD_VARIANT
+    prompt: "Which library variant should this application link against?"
+    default: "static"
+    options: ["debug", "memory", "static", "shared"]
+
+create_prompts:
+  - var: c_standard
+    prompt: "Which C Standard?"
+    default: "23"
+    options: ["99", "11", "17", "23"]
+
+  - var: cxx_standard
+    prompt: "Which C++ Standard (if mixed source)?"
+    default: "17"
+    options: ["11", "14", "17", "20", "23"]
+
+  - var: ubuntu_tag
+    prompt: "Ubuntu Docker base image tag:"
+    default: "22.04"
+    options: ["20.04", "22.04", "24.04"]
+
+  - var: cmake_version
+    prompt: "CMake version to install in Docker:"
+    default: "3.26.4"

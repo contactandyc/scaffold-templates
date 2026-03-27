@@ -1,0 +1,86 @@
+{#- scaffold-repo: deps -#}
+cmake_minimum_required(VERSION {{ cmake_min_version | default("3.20") }})
+
+project({{ project_snake }}
+  VERSION {{ version | default("1.0.0") }}
+  LANGUAGES {{ language | default("C") }}
+)
+
+# ── Variant selection for consuming dependencies ───────────────
+# This tells find_package() which variant of your internal libraries to link against.
+set(A_BUILD_VARIANT "{{ default_variant | default("static") }}" CACHE STRING
+    "Library variant to link against (debug|memory|static|shared)")
+set_property(CACHE A_BUILD_VARIANT PROPERTY STRINGS debug memory static shared)
+
+if(MSVC)
+  set(_A_DEBUG_OPTS /Zi /Od)
+  set(_A_RELEASE_OPTS /O2 /DNDEBUG)
+else()
+  set(_A_DEBUG_OPTS -O0 -g)
+  set(_A_RELEASE_OPTS -O3 -DNDEBUG)
+endif()
+
+include(GNUInstallDirs)
+
+# ---- Dependencies (Standard CMake) ----
+{% for fp in find_packages or [] %}
+find_package({{ fp }})
+{% endfor %}
+
+# ---- Dependencies (PkgConfig Shims) ----
+{% if pkg_config_deps %}
+find_package(PkgConfig REQUIRED)
+{% for dep in pkg_config_deps %}
+pkg_check_modules(PC_{{ dep.target | upper }} REQUIRED IMPORTED_TARGET {{ dep.module }})
+if(NOT TARGET {{ dep.target }})
+  add_library({{ dep.target }} ALIAS PkgConfig::PC_{{ dep.target | upper }})
+endif()
+{% endfor %}
+{% endif %}
+
+# ── Application Executable ────────────────────────────────────────────────────
+
+add_executable({{ project_snake }}
+{%- for s in sources %}
+  {{ s }}
+{%- else %}
+  src/main.c
+{%- endfor %}
+)
+
+target_include_directories({{ project_snake }} PRIVATE
+  ${CMAKE_CURRENT_SOURCE_DIR}/include
+)
+
+set_target_properties({{ project_snake }} PROPERTIES
+  C_STANDARD {{ c_standard | default(23) }}
+  C_STANDARD_REQUIRED YES
+)
+
+if("CXX" IN_LIST CMAKE_PROJECT_LANGUAGES)
+  set_target_properties({{ project_snake }} PROPERTIES
+    CXX_STANDARD {{ cxx_standard | default(17) }}
+    CXX_STANDARD_REQUIRED YES
+  )
+endif()
+
+# Link deps
+target_link_libraries({{ project_snake }} PRIVATE
+{%- for l in link_libraries or [] %}
+  {{ l }}
+{%- endfor %}
+)
+
+# Optimization flavor mapping based on CMAKE_BUILD_TYPE
+target_compile_options({{ project_snake }} PRIVATE
+  $<$<CONFIG:Debug>:${_A_DEBUG_OPTS}>
+  $<$<NOT:$<CONFIG:Debug>>:${_A_RELEASE_OPTS}>
+)
+
+# Install the binary
+install(TARGETS {{ project_snake }}
+  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+)
+
+# Extra project-specific targets
+{{ extra_targets | default("") }}

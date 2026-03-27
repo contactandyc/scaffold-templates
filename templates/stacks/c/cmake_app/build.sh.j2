@@ -1,0 +1,68 @@
+{#- scaffold-repo: { context: deps, executable: true } -#}
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+# --- Discover and source scoped environment ---
+_cur="$PWD"
+while [ "$_cur" != "/" ]; do
+  if [ -f "$_cur/.scaffoldrc.yaml" ]; then
+    [ -f "$_cur/.scaffoldrc_{{ stack }}_{{ stack_type }}" ] && source "$_cur/.scaffoldrc_{{ stack }}_{{ stack_type }}"
+    break
+  fi
+  _cur="$(dirname "$_cur")"
+done
+[ -z "${WORKSPACE_DIR:-}" ] && [ -f "$HOME/.scaffoldrc_{{ stack }}_{{ stack_type }}" ] && source "$HOME/.scaffoldrc_{{ stack }}_{{ stack_type }}"
+
+# --- Script Commands ---
+COMMAND="${1:-build}"
+
+# --- Knobs ---
+PREFIX="${PREFIX:-/usr/local}"
+BUILD_DIR="${BUILD_DIR:-build}"
+BUILD_TYPE="${BUILD_TYPE:-RelWithDebInfo}"
+BUILD_VARIANT="${BUILD_VARIANT:-static}"
+GENERATOR="${GENERATOR:-}"
+
+pick_generator() {
+  if [ -n "$GENERATOR" ]; then return; fi
+  if command -v ninja >/dev/null; then GENERATOR="Ninja"
+  elif command -v make >/dev/null; then GENERATOR="Unix Makefiles"
+  else echo "Error: No build tool found. Install Ninja or Make." >&2; exit 1; fi
+}
+
+case "$COMMAND" in
+  build|install)
+    pick_generator
+    echo "--- Building Application (Generator: $GENERATOR, Type: $BUILD_TYPE, Linking: $BUILD_VARIANT) ---"
+
+    cmake -S . -B "$BUILD_DIR" -G "$GENERATOR" \
+      -DCMAKE_BUILD_TYPE="$BUILD_TYPE" \
+      -DCMAKE_INSTALL_PREFIX="$PREFIX" \
+      -DA_BUILD_VARIANT="$BUILD_VARIANT"
+
+    cmake --build "$BUILD_DIR" -j
+
+    if [ "$COMMAND" = "install" ]; then
+      echo "--- Installing to '$PREFIX' ---"
+      INSTALL_SUDO=""
+      if [[ "$PREFIX" == "/usr"* ]] && [[ "${EUID:-$(id -u)}" -ne 0 ]]; then
+        INSTALL_SUDO="sudo"
+      fi
+      $INSTALL_SUDO cmake --install "$BUILD_DIR"
+      echo "✅ Install complete."
+    else
+      echo "✅ Build complete. Artifacts are in '$BUILD_DIR/'."
+    fi
+    ;;
+
+  clean)
+    echo "--- Cleaning Build Directories ---"
+    rm -rf "$BUILD_DIR"
+    echo "✅ Clean complete."
+    ;;
+
+  *)
+    echo "Usage: $0 [build|install|clean]" >&2
+    exit 1
+    ;;
+esac
