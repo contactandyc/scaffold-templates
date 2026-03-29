@@ -14,6 +14,31 @@ dev_packages:
   automake: true
   libtool: true
 
+subproject_rules:
+  main:
+    targets_dir: "src"
+    source_globs: [ "**/*.c", "**/*.cpp", "**/*.cxx", "**/*.cc" ]
+    discovery_strategy: "aggregate"
+    default_ext: "c"
+  apps:
+    resource: "app-resources"
+    targets_dir: "src"
+    source_globs: [ "**/*.c", "**/*.cpp" ]
+    discovery_strategy: "aggregate"
+    default_ext: "c"
+  examples:
+    resource: "app-resources"     # Reuses the exact same templates as apps!
+    targets_dir: "src"            # Empty means look directly in the root of the example
+    source_globs: [ "*.c", "*.cpp" ]
+    discovery_strategy: "1-to-1"
+    default_ext: "c"
+  tests:
+    resource: "test-resources"
+    targets_dir: "src"            # Looks in tests/src/
+    source_globs: [ "test_*.c", "test_*.cpp" ]
+    discovery_strategy: "1-to-1"
+    default_ext: "c"
+
 # ── 2. Default Dependency/Build Behaviors ──
 kind: git
 url: https://github.com/{{ github_project | default('contactandyc') }}/{{ name }}.git

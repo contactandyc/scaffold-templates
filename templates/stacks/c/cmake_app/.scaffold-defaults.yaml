@@ -9,6 +9,28 @@ dev_packages:
   gdb: true
   perl: true
 
+# ── Generic Sub-Project Rules ──
+subproject_rules:
+  main:
+    targets_dir: "src"
+    source_globs: [ "**/*.c", "**/*.cpp", "**/*.cxx", "**/*.cc" ]
+    discovery_strategy: "aggregate"
+  apps:
+    resource: "app-resources"
+    targets_dir: "src"
+    source_globs: [ "**/*.c", "**/*.cpp" ]
+    discovery_strategy: "aggregate"
+  examples:
+    resource: "app-resources"
+    targets_dir: "src"
+    source_globs: [ "*.c", "*.cpp" ]
+    discovery_strategy: "1-to-1"
+  tests:
+    resource: "test-resources"
+    targets_dir: "src"
+    source_globs: [ "test_*.c", "test_*.cpp" ]
+    discovery_strategy: "1-to-1"
+
 # ── 2. Default Dependency/Build Behaviors ──
 kind: git
 url: https://github.com/{{ github_project | default('contactandyc') }}/{{ name }}.git
@@ -18,6 +40,8 @@ build_steps:
   - ./build.sh install
 
 # Note: Applications do not export find_package or link targets for other repos to consume.
+find_package: null
+link: null
 
 init_prompts:
   - var: PREFIX

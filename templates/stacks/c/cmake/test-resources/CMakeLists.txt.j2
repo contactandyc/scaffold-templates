@@ -1,8 +1,8 @@
 {#- scaffold-repo: deps -#}
-# CMakeLists.txt for tests
+# CMakeLists.txt for {{ subproject_block }}
 cmake_minimum_required(VERSION {{ cmake_min_version | default("3.20") }})
 
-project({{ project_snake }}_tests LANGUAGES {{ language | default("C") }})
+project({{ subproject_name }} LANGUAGES {{ language | default("C") }})
 
 set(A_BUILD_VARIANT "debug" CACHE STRING
     "Variant to link via {{ project_snake }}::{{ project_snake }} (debug|memory|static|shared)")
@@ -12,40 +12,50 @@ option(A_ENABLE_COVERAGE "Enable code coverage instrumentation" OFF)
 
 find_library(M_LIB m)
 
-# ---- Test executables ----
+{% for fp in find_packages or [] %}
+find_package({{ fp }})
+{% endfor %}
+
+{% if subproject_stack_type != "cmake_app" %}
+# Fallback for standalone test builds (when not included via add_subdirectory)
+if(NOT TARGET {{ project_snake }}::{{ project_snake }})
+  find_package({{ project_snake }} CONFIG REQUIRED)
+endif()
+{% endif %}
+
 set(TEST_EXECUTABLES "")
-{% for tgt in test_targets or [] %}
+
+# ---- Targets ----
+{% for tgt in targets or [] %}
 add_executable({{ tgt.name }}
-{%- for s in tgt.sources %}
+{% for s in tgt.sources %}
   {{ s }}
-{%- endfor %}
+{% endfor %}
 )
 
-{% if tgt.include_dirs %}
 target_include_directories({{ tgt.name }} PRIVATE
-{%- for d in tgt.include_dirs %}
+  ${CMAKE_CURRENT_SOURCE_DIR}/../src
+{% for d in tgt.include_dirs | default([]) %}
   ${CMAKE_CURRENT_SOURCE_DIR}/{{ d }}
-{%- endfor %}
+{% endfor %}
 )
-{% endif %}
 
 list(APPEND TEST_EXECUTABLES {{ tgt.name }})
 
 set_target_properties({{ tgt.name }} PROPERTIES
-  C_STANDARD {{ c_standard | default(17) }}
+  C_STANDARD {{ tgt.c_standard | default(c_standard) | default(17) }}
   C_STANDARD_REQUIRED YES
 )
 if("CXX" IN_LIST CMAKE_PROJECT_LANGUAGES)
   set_target_properties({{ tgt.name }} PROPERTIES
-    CXX_STANDARD {{ cxx_standard | default(17) }}
+    CXX_STANDARD {{ tgt.cxx_standard | default(cxx_standard) | default(17) }}
     CXX_STANDARD_REQUIRED YES
   )
 endif()
 
-if(NOT TARGET {{ project_snake }}::{{ project_snake }})
-  find_package({{ project_snake }} CONFIG REQUIRED)
-endif()
-target_link_libraries({{ tgt.name }} PRIVATE {{ project_snake }}::{{ project_snake }})
+{% for l in link_libraries or [] %}
+target_link_libraries({{ tgt.name }} PRIVATE {{ l }})
+{% endfor %}
 
 if(M_LIB)
   target_link_libraries({{ tgt.name }} PRIVATE ${M_LIB})
@@ -97,8 +107,8 @@ if(A_ENABLE_COVERAGE AND CMAKE_C_COMPILER_ID MATCHES "Clang")
       COMMENT "Merging coverage data"
     )
 
-    {% if kind | default('compiled') == "header_only" %}
-    # For header-only, report coverage from all test executables
+    {% if kind | default('compiled') == "header_only" or subproject_stack_type == "cmake_app" %}
+    # For header-only or app stacks, report coverage from all test executables
     foreach(tgt IN LISTS TEST_EXECUTABLES)
       add_custom_command(TARGET coverage_report POST_BUILD
         COMMAND ${LLVM_COV_EXECUTABLE} show

@@ -7,7 +7,6 @@ project({{ project_snake }}
 )
 
 # ── Variant selection for consuming dependencies ───────────────
-# This tells find_package() which variant of your internal libraries to link against.
 set(A_BUILD_VARIANT "{{ default_variant | default("static") }}" CACHE STRING
     "Library variant to link against (debug|memory|static|shared)")
 set_property(CACHE A_BUILD_VARIANT PROPERTY STRINGS debug memory static shared)
@@ -22,15 +21,14 @@ endif()
 
 include(GNUInstallDirs)
 
-# ---- Dependencies (Standard CMake) ----
-{% for fp in find_packages or [] %}
+# ---- Global Dependencies ----
+{% for fp in deps.find_packages | default([]) %}
 find_package({{ fp }})
 {% endfor %}
 
-# ---- Dependencies (PkgConfig Shims) ----
-{% if pkg_config_deps %}
+{% if deps.pkg_config_deps %}
 find_package(PkgConfig REQUIRED)
-{% for dep in pkg_config_deps %}
+{% for dep in deps.pkg_config_deps %}
 pkg_check_modules(PC_{{ dep.target | upper }} REQUIRED IMPORTED_TARGET {{ dep.module }})
 if(NOT TARGET {{ dep.target }})
   add_library({{ dep.target }} ALIAS PkgConfig::PC_{{ dep.target | upper }})
@@ -38,49 +36,62 @@ endif()
 {% endfor %}
 {% endif %}
 
-# ── Application Executable ────────────────────────────────────────────────────
+# ── Application Executables ───────────────────────────────────────────────────
 
-add_executable({{ project_snake }}
-{%- for s in sources %}
+{% for main_ctx in main.values() %}
+{% for tgt in main_ctx.targets %}
+add_executable({{ tgt.name }}
+{% for s in tgt.sources %}
   {{ s }}
-{%- else %}
+{% else %}
   src/main.c
-{%- endfor %}
+{% endfor %}
 )
 
-target_include_directories({{ project_snake }} PRIVATE
-  ${CMAKE_CURRENT_SOURCE_DIR}/include
+target_include_directories({{ tgt.name }} PRIVATE
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+{% for d in tgt.include_dirs | default([]) %}
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/{{ d }}>
+{% endfor %}
 )
 
-set_target_properties({{ project_snake }} PROPERTIES
-  C_STANDARD {{ c_standard | default(23) }}
+set_target_properties({{ tgt.name }} PROPERTIES
+  C_STANDARD {{ tgt.c_standard | default(c_standard) | default(23) }}
   C_STANDARD_REQUIRED YES
 )
 
 if("CXX" IN_LIST CMAKE_PROJECT_LANGUAGES)
-  set_target_properties({{ project_snake }} PROPERTIES
-    CXX_STANDARD {{ cxx_standard | default(17) }}
+  set_target_properties({{ tgt.name }} PROPERTIES
+    CXX_STANDARD {{ tgt.cxx_standard | default(cxx_standard) | default(17) }}
     CXX_STANDARD_REQUIRED YES
   )
 endif()
 
-# Link deps
-target_link_libraries({{ project_snake }} PRIVATE
-{%- for l in link_libraries or [] %}
+target_link_libraries({{ tgt.name }} PRIVATE
+{% for l in main_ctx.link_libraries | default([]) %}
   {{ l }}
-{%- endfor %}
+{% endfor %}
 )
 
-# Optimization flavor mapping based on CMAKE_BUILD_TYPE
-target_compile_options({{ project_snake }} PRIVATE
+target_compile_options({{ tgt.name }} PRIVATE
   $<$<CONFIG:Debug>:${_A_DEBUG_OPTS}>
   $<$<NOT:$<CONFIG:Debug>>:${_A_RELEASE_OPTS}>
 )
 
-# Install the binary
-install(TARGETS {{ project_snake }}
+install(TARGETS {{ tgt.name }}
   RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
+{% endfor %}
+{% endfor %}
 
 # Extra project-specific targets
 {{ extra_targets | default("") }}
+
+{% if tests %}
+enable_testing()
+{% endif %}
+
+# Dynamically mount all subprojects (apps, examples, tests, etc.)
+{% for subdir in active_subprojects | default([]) %}
+add_subdirectory({{ subdir }})
+{% endfor %}
