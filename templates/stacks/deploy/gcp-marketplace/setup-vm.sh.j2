@@ -1,0 +1,43 @@
+{#- scaffold-repo: { dest: "setup-vm.sh", executable: true } -#}
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+echo "=== Bootstrapping VM for {{ project_title }} ==="
+
+export DEBIAN_FRONTEND=noninteractive
+apt-get update
+apt-get install -y build-essential git curl wget cmake pkg-config ca-certificates sudo
+
+{% set all_apt = (deps.get('apt_packages', []) + deps.get('apt_dev_packages', [])) | join(' ') %}
+{% if all_apt %}
+echo "--> Installing System Dependencies..."
+apt-get install -y {{ all_apt }}
+{% endif %}
+
+echo "--> Building Application and Dependencies..."
+mkdir -p /opt/workspace
+cd /opt/workspace
+
+{% set libs = deps.get('libraries', []) if deps is mapping else [] %}
+{% for lib in libs if lib.get('kind') in ["git","tar"] and lib.get('build_steps') %}
+{% set lib_url = lib.get('url') %}
+{% set clean_steps = [] %}
+{% for s in lib.get('build_steps', []) %}
+  {% if 'git clone' not in s and 'rm -rf' not in s and not s.startswith('cd ') %}
+    {% set _ = clean_steps.append(s) %}
+  {% endif %}
+{% endfor %}
+echo "--> Building {{ lib.name }}"
+git clone {% if lib.get('shallow', true) %}--depth 1 {% endif %}{% if lib.get('branch') %}--branch {{ lib.get('branch') }} {% endif %}--single-branch "{{ lib_url }}" "{{ lib.name }}"
+cd "{{ lib.name }}"
+{{ clean_steps | join(' && \\\n    ') }}
+cd ..
+rm -rf "{{ lib.name }}"
+{% endfor %}
+
+echo "--> Scrubbing Image for Marketplace..."
+rm -rf /tmp/* /var/tmp/* /root/.ssh/* /root/.bash_history ~/.bash_history
+apt-get clean
+rm -rf /var/lib/apt/lists/*
+
+echo "=== VM Bootstrap Complete ==="

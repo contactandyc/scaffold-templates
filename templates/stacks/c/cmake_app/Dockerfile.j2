@@ -45,7 +45,7 @@ ENV PATH="/opt/venv/bin:${PATH}"
 
 {% set libs = deps.get('libraries', []) if deps is mapping else [] %}
 {% for lib in libs if lib.get('kind') in ["git","tar"] and lib.get('build_steps') %}
-{% set lib_url = lib.get('url') or ("https://github.com/" ~ github_project|default('contactandyc') ~ "/" ~ lib.name ~ ".git") %}
+{% set lib_url = lib.get('url') %}
 {% set clean_steps = [] %}
 {% for s in lib.get('build_steps', []) %}
   {% if 'git clone' not in s and 'rm -rf' not in s and not s.startswith('cd ') %}

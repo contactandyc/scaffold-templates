@@ -1,0 +1,41 @@
+project_title: {{ project_title | default(project_slug) }}
+version: "0.1.0"
+description: "A dynamically scaffolded {{ stack }}/{{ stack_type }} project"
+stack: {{ stack }}/{{ stack_type }}
+date_created: {{ current_date }}
+
+{% if profile %}
+profile: {{ profile }}
+{% endif %}
+
+{% if registry_url %}
+# ── 1. Scaffolding Engine Source ──
+base_templates:
+  repo: {{ registry_url }}
+  ref: {{ registry_ref | default('main') }}
+{% endif %}
+
+# ── Dynamic Setup Variables ──
+{% for k, v in prompt_answers.items() %}
+{{ k }}: {{ v | tojson }}
+{% endfor %}
+
+# ── 3. Licenses & Legal ──
+# license_profile: apache-2.0
+# license_overrides:
+#   "src/vendor/**": mit
+
+{% block dependencies %}
+# ── 4. Dependencies ──
+depends_on: []
+{% endblock %}
+
+{% block stack_specific_config %}
+# (Language-specific auto-discovery config goes here)
+{% endblock %}
+
+{% block extra_config %}
+# ── Feature Flags & Overrides ──
+# packages:
+#   changie: true
+{% endblock %}

@@ -1,0 +1,13 @@
+{% extends "base/scaffold.yaml.j2" %}
+
+{% block dependencies %}
+# ── 4. Deployment Target ──
+# Add the Git URL of the application you are deploying here.
+# To rollback a deployment, simply change the branch tag and run ./build.sh!
+depends_on:
+  - url: "https://github.com/contactandyc/the-io-library.git"
+    branch: "v1.0.0"
+{% endblock %}
+
+{% block stack_specific_config %}
+{% endblock %}

@@ -1,0 +1,29 @@
+build_steps:
+  - ./build.sh build
+
+create_prompts:
+  - var: gcp_project_id
+    prompt: "GCP Project ID:"
+    default: "my-gcp-project"
+
+  - var: gcp_region
+    prompt: "GCP Region:"
+    default: "us-central1"
+
+  - var: gcp_zone
+    prompt: "GCP Zone:"
+    default: "us-central1-a"
+
+  - var: gcp_machine_type
+    prompt: "Compute Machine Type:"
+    default: "c2-standard-4"
+    options: ["c2-standard-4", "c2-standard-8", "c3-highcpu-4", "n2-standard-4"]
+
+  - var: ubuntu_image_family
+    prompt: "Base OS Image (Ubuntu LTS):"
+    default: "ubuntu-2204-lts"
+    options: ["ubuntu-2004-lts", "ubuntu-2204-lts", "ubuntu-2404-lts"]
+
+  - var: gcp_disk_size_gb
+    prompt: "Boot Disk Size (GB):"
+    default: "20"

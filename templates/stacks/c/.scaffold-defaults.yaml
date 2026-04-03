@@ -3,3 +3,10 @@ init_prompts:
     prompt: "Select C/C++ build system:"
     choices_from_dir: "stacks/{{ stack }}"
     exclude: ["base"]
+  - var: generate_gcp_deployment
+    prompt: "Generate Google Cloud VM & Packer deployment files?"
+    default: "yes"
+    options: ["yes", "no"]
+  - var: gcp_project_id
+    prompt: "GCP Project ID (leave blank if not using GCP):"
+    default: ""

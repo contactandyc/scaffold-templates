@@ -41,7 +41,6 @@ subproject_rules:
 
 # ── 2. Default Dependency/Build Behaviors ──
 kind: git
-url: https://github.com/{{ github_project | default('contactandyc') }}/{{ name }}.git
 shallow: false
 build_steps:
   - ./build.sh clean

@@ -1,0 +1,22 @@
+{#- scaffold-repo: { executable: true } -#}
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+COMMAND="${1:-build}"
+
+case "$COMMAND" in
+  build)
+    echo "--- Initializing Packer ---"
+    packer init build-image.pkr.hcl
+    echo "--- Baking GCP Marketplace Image ---"
+    packer build build-image.pkr.hcl
+    ;;
+  clean)
+    echo "Cleaning packer caches..."
+    rm -rf .packer_plugins
+    ;;
+  *)
+    echo "Usage: $0 [build|clean]" >&2
+    exit 1
+    ;;
+esac

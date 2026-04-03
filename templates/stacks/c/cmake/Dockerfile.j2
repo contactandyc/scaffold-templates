@@ -15,6 +15,7 @@ RUN apt-get update && apt-get install -y \
     git \
     curl \
     wget \
+    abigail-tools \
     tar \
     unzip \
     zip \
@@ -54,14 +55,19 @@ RUN useradd --create-home --shell /bin/bash dev && \
 USER dev
 WORKDIR /workspace
 
+{% set all_apt = (deps.get('apt_packages', []) + deps.get('apt_dev_packages', [])) | join(' ') %}
+{% if 'python3' in all_apt %}
 # --- Optional Python venv for tools ------------------------------------------
-RUN python3 -m venv /opt/venv && /opt/venv/bin/pip install --upgrade pip
+RUN sudo python3 -m venv /opt/venv && \
+    sudo chown -R dev:dev /opt/venv && \
+    /opt/venv/bin/pip install --upgrade pip
 ENV PATH="/opt/venv/bin:${PATH}"
+{% endif %}
 
 {% set libs = deps.get('libraries', []) if deps is mapping else [] %}
 {% for lib in libs if lib.get('kind') in ["git","tar"] and lib.get('build_steps') %}
 # --- Build & install {{ lib.get('name', 'dependency') }} ---
-{% set lib_url = lib.get('url') or ("https://github.com/" ~ github_project|default('contactandyc') ~ "/" ~ lib.name ~ ".git") %}
+{% set lib_url = lib.get('url') %}
 {% set clean_steps = [] %}
 {% for s in lib.get('build_steps', []) %}
   {% if 'git clone' not in s and 'rm -rf' not in s and not s.startswith('cd ') %}
@@ -71,13 +77,9 @@ ENV PATH="/opt/venv/bin:${PATH}"
 RUN set -eux; \
     git clone {% if lib.get('shallow', true) %}--depth 1 {% endif %}{% if lib.get('branch') %}--branch {{ lib.get('branch') }} {% endif %}--single-branch "{{ lib_url }}" "{{ lib.name }}"; \
     cd "{{ lib.name }}"; \
-{% for s in clean_steps %}
-    {{ s }}{% if not loop.last %} && \{% endif %}
-
-{% endfor %}; \
+    {{ clean_steps | join(' && \\\n    ') }}; \
     cd ..; \
     rm -rf "{{ lib.name }}"
-
 {% endfor %}
 
 # --- Build & install this project --------------------------------------------

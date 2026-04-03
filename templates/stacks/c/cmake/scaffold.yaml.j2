@@ -1,0 +1,21 @@
+{% extends "base/scaffold.yaml.j2" %}
+
+{% block stack_specific_config %}
+# ── 5. Sources (Auto-Discovered) ──
+# library_sources:
+#   - src/main.c
+
+# ── 6. Tests (Auto-Discovered) ──
+# tests:
+#   targets:
+#     - name: test_custom
+#       sources:
+#         - tests/src/test_custom.c
+
+# ── 7. Apps & Examples (Optional) ──
+# apps:
+#   01_basic_example:
+#     binaries:
+#       basic_app:
+#         - src/main.c
+{% endblock %}

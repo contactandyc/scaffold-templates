@@ -47,7 +47,7 @@ sudo apt-get update && sudo apt-get install -y {{ apt_dev|join(' ') }}
 {% if lib.get('build_steps') %}
 Clone & build:
 
-{% set lib_url = lib.get('url') or ("https://github.com/" ~ github_project|default('contactandyc') ~ "/" ~ lib.name ~ ".git") %}
+{% set lib_url = lib.get('url') %}
 {% set clean_steps = [] %}
 {% for s in lib.get('build_steps', []) %}
   {% if 'git clone' not in s and 'rm -rf' not in s and not s.startswith('cd ') %}
