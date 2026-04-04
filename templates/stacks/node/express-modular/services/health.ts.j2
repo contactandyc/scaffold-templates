@@ -1,0 +1,28 @@
+{#- scaffold-repo: { dest: "src/services/health.{{ 'ts' if use_typescript == 'yes' else 'js' }}" } -#}
+// SPDX-FileCopyrightText: {{ year | default('2026') }} {{ author | default('Andy Curtis <contactandyc@gmail.com>') }}
+// SPDX-License-Identifier: Apache-2.0
+//
+// Maintainer: {{ author | default('Andy Curtis <contactandyc@gmail.com>') }}
+
+{% if use_typescript == 'yes' %}
+import { SystemHealth } from '../models/health';
+
+export const checkHealthStatus = async (): Promise<SystemHealth> => {
+  // In a real app, this might check DB connectivity, Redis ping, etc.
+  return {
+    status: 'ok',
+    project: '{{ project_slug }}',
+    uptime: process.uptime(),
+    timestamp: new Date().toISOString()
+  };
+};
+{% else %}
+export const checkHealthStatus = async () => {
+  return {
+    status: 'ok',
+    project: '{{ project_slug }}',
+    uptime: process.uptime(),
+    timestamp: new Date().toISOString()
+  };
+};
+{% endif %}

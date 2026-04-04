@@ -1,0 +1,101 @@
+{#- scaffold-repo: { dest: "src/services/store.{{ 'ts' if use_typescript == 'yes' else 'js' }}" } -#}
+// SPDX-FileCopyrightText: {{ year | default('2026') }} {{ author | default('Andy Curtis <contactandyc@gmail.com>') }}
+// SPDX-License-Identifier: Apache-2.0
+//
+// Maintainer: {{ author | default('Andy Curtis <contactandyc@gmail.com>') }}
+
+{% if kv_backend == 'redis' %}
+// --- Redis Implementation ---
+import { createClient } from 'redis';
+const client = createClient({
+  url: process.env.REDIS_URL || 'redis://localhost:6379'
+});
+
+client.on('error', (err{% if use_typescript == 'yes' %}: any{% endif %}) => console.error('Redis Client Error', err));
+
+export const init = async (){% if use_typescript == 'yes' %}: Promise<void>{% endif %} => {
+  await client.connect();
+  console.log('📦 Redis KV Client Connected');
+};
+
+export const setItem = async (key{% if use_typescript == 'yes' %}: string{% endif %}, value{% if use_typescript == 'yes' %}: string{% endif %}){% if use_typescript == 'yes' %}: Promise<void>{% endif %} => {
+  await client.set(key, value);
+};
+
+export const getItem = async (key{% if use_typescript == 'yes' %}: string{% endif %}){% if use_typescript == 'yes' %}: Promise<string | null>{% endif %} => {
+  return await client.get(key);
+};
+
+export const deleteItem = async (key{% if use_typescript == 'yes' %}: string{% endif %}){% if use_typescript == 'yes' %}: Promise<void>{% endif %} => {
+  await client.del(key);
+};
+
+export const hasItem = async (key{% if use_typescript == 'yes' %}: string{% endif %}){% if use_typescript == 'yes' %}: Promise<boolean>{% endif %} => {
+  return (await client.exists(key)) === 1;
+};
+
+{% elif kv_backend == 'postgres' %}
+// --- Postgres Implementation ---
+import { Client } from 'pg';
+
+const client = new Client({
+  connectionString: process.env.DATABASE_URL || 'postgresql://user:password@localhost:5432/storedb'
+});
+
+export const init = async (){% if use_typescript == 'yes' %}: Promise<void>{% endif %} => {
+  await client.connect();
+  await client.query(`
+    CREATE TABLE IF NOT EXISTS kv_store (
+      k VARCHAR(255) PRIMARY KEY,
+      v TEXT NOT NULL
+    );
+  `);
+  console.log('📦 Postgres KV Client Connected & Initialized');
+};
+
+export const setItem = async (key{% if use_typescript == 'yes' %}: string{% endif %}, value{% if use_typescript == 'yes' %}: string{% endif %}){% if use_typescript == 'yes' %}: Promise<void>{% endif %} => {
+  await client.query(
+    'INSERT INTO kv_store (k, v) VALUES ($1, $2) ON CONFLICT (k) DO UPDATE SET v = $2',
+    [key, value]
+  );
+};
+
+export const getItem = async (key{% if use_typescript == 'yes' %}: string{% endif %}){% if use_typescript == 'yes' %}: Promise<string | null>{% endif %} => {
+  const res = await client.query('SELECT v FROM kv_store WHERE k = $1', [key]);
+  if (res.rows.length > 0) return res.rows[0].v;
+  return null;
+};
+
+export const deleteItem = async (key{% if use_typescript == 'yes' %}: string{% endif %}){% if use_typescript == 'yes' %}: Promise<void>{% endif %} => {
+  await client.query('DELETE FROM kv_store WHERE k = $1', [key]);
+};
+
+export const hasItem = async (key{% if use_typescript == 'yes' %}: string{% endif %}){% if use_typescript == 'yes' %}: Promise<boolean>{% endif %} => {
+  const res = await client.query('SELECT 1 FROM kv_store WHERE k = $1', [key]);
+  return res.rows.length > 0;
+};
+
+{% else %}
+// --- Internal Memory Implementation ---
+const memoryStore{% if use_typescript == 'yes' %}: Record<string, string>{% endif %} = {};
+
+export const init = async (){% if use_typescript == 'yes' %}: Promise<void>{% endif %} => {
+  console.log('📦 Internal Memory KV Store Initialized');
+};
+
+export const setItem = async (key{% if use_typescript == 'yes' %}: string{% endif %}, value{% if use_typescript == 'yes' %}: string{% endif %}){% if use_typescript == 'yes' %}: Promise<void>{% endif %} => {
+  memoryStore[key] = value;
+};
+
+export const getItem = async (key{% if use_typescript == 'yes' %}: string{% endif %}){% if use_typescript == 'yes' %}: Promise<string | null>{% endif %} => {
+  return memoryStore[key] || null;
+};
+
+export const deleteItem = async (key{% if use_typescript == 'yes' %}: string{% endif %}){% if use_typescript == 'yes' %}: Promise<void>{% endif %} => {
+  delete memoryStore[key];
+};
+
+export const hasItem = async (key{% if use_typescript == 'yes' %}: string{% endif %}){% if use_typescript == 'yes' %}: Promise<boolean>{% endif %} => {
+  return key in memoryStore;
+};
+{% endif %}

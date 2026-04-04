@@ -1,0 +1,19 @@
+{#- scaffold-repo: { dest: "src/controllers/health.{{ 'ts' if use_typescript == 'yes' else 'js' }}" } -#}
+// SPDX-FileCopyrightText: {{ year | default('2026') }} {{ author | default('Andy Curtis <contactandyc@gmail.com>') }}
+// SPDX-License-Identifier: Apache-2.0
+//
+// Maintainer: {{ author | default('Andy Curtis <contactandyc@gmail.com>') }}
+
+{% if use_typescript == 'yes' %}
+import { Request, Response } from 'express';
+{% endif %}
+import { checkHealthStatus } from '../services/health';
+
+export const getSystemHealth = async (req{% if use_typescript == 'yes' %}: Request{% endif %}, res{% if use_typescript == 'yes' %}: Response{% endif %}){% if use_typescript == 'yes' %}: Promise<void>{% endif %} => {
+  try {
+    const healthData = await checkHealthStatus();
+    res.status(200).json(healthData);
+  } catch (error) {
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+};

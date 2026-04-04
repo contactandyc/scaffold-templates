@@ -43,15 +43,11 @@ target_include_directories({{ tgt.name }} PRIVATE
 list(APPEND TEST_EXECUTABLES {{ tgt.name }})
 
 set_target_properties({{ tgt.name }} PROPERTIES
-  C_STANDARD {{ tgt.c_standard | default(c_standard) | default(17) }}
+  C_STANDARD {{ tgt.c_standard | default(c_standard) | default(23) }}
   C_STANDARD_REQUIRED YES
+  CXX_STANDARD {{ tgt.cxx_standard | default(cxx_standard) | default(17) }}
+  CXX_STANDARD_REQUIRED YES
 )
-if("CXX" IN_LIST CMAKE_PROJECT_LANGUAGES)
-  set_target_properties({{ tgt.name }} PROPERTIES
-    CXX_STANDARD {{ tgt.cxx_standard | default(cxx_standard) | default(17) }}
-    CXX_STANDARD_REQUIRED YES
-  )
-endif()
 
 {% for l in link_libraries or [] %}
 target_link_libraries({{ tgt.name }} PRIVATE {{ l }})

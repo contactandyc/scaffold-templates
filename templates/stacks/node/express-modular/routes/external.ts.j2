@@ -1,0 +1,15 @@
+{#- scaffold-repo: { dest: "src/routes/external.{{ 'ts' if use_typescript == 'yes' else 'js' }}" } -#}
+{% if include_external_api == 'yes' %}
+// SPDX-FileCopyrightText: {{ year | default('2026') }} {{ author | default('Andy Curtis <contactandyc@gmail.com>') }}
+// SPDX-License-Identifier: Apache-2.0
+//
+// Maintainer: {{ author | default('Andy Curtis <contactandyc@gmail.com>') }}
+
+import { Router } from 'express';
+import { getExternalUser } from '../controllers/external';
+
+const router = Router();
+router.get('/user/:id', getExternalUser);
+
+export default router;
+{% endif %}

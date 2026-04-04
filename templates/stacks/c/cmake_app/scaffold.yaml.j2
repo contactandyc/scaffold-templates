@@ -1,0 +1,32 @@
+{% extends "base/scaffold.yaml.j2" %}
+
+{% block dependencies %}
+# ── 4. Dependencies ──
+depends_on:
+  - https://github.com/contactandyc/the-io-library.git
+{% endblock %}
+
+{% block stack_specific_config %}
+# ── 5. Main Executable (Auto-Discovered) ──
+# By default, all C/C++ files in src/ are compiled into an executable named 'my_app'.
+# You can override this behavior explicitly:
+# main:
+#   targets:
+#     - name: my_app
+#       sources:
+#         - src/main.c
+#       depends_on:
+#         - https://github.com/contactandyc/the-io-library.git
+
+# ── 6. Additional Apps & Tools (Optional) ──
+# apps:
+#   admin_tool:
+#     targets:
+#       - name: admin_cli
+#         sources:
+#           - src/admin.c
+
+# ── Feature Flags & Overrides ──
+# packages:
+#   changie: true
+{% endblock %}

@@ -1,0 +1,42 @@
+{#- scaffold-repo: { dest: "build.sh", executable: true } -#}
+#!/usr/bin/env bash
+# SPDX-FileCopyrightText: {{ year | default('2026') }} {{ author | default('Andy Curtis <contactandyc@gmail.com>') }}
+# SPDX-License-Identifier: Apache-2.0
+#
+# Maintainer: {{ author | default('Andy Curtis <contactandyc@gmail.com>') }}
+
+set -Eeuo pipefail
+
+COMMAND="${1:-build}"
+PKG_MGR="{{ pkg_manager | default('npm') }}"
+
+case "$COMMAND" in
+  install)
+    echo "--- Installing JS Dependencies ($PKG_MGR) ---"
+    $PKG_MGR install
+    ;;
+  dev)
+    echo "--- Starting Express Dev Server (Nodemon) ---"
+    if [ ! -d "node_modules" ]; then "$0" install; fi
+    $PKG_MGR run dev
+    ;;
+  build)
+    echo "--- Building Production API ---"
+    if [ ! -d "node_modules" ]; then "$0" install; fi
+    $PKG_MGR run build
+    echo "✅ Build complete. Artifacts are in 'dist/'"
+    ;;
+  start)
+    echo "--- Starting Production Server ---"
+    $PKG_MGR run start
+    ;;
+  clean)
+    echo "--- Cleaning Workspace ---"
+    rm -rf node_modules dist .eslintcache
+    echo "✅ Clean complete."
+    ;;
+  *)
+    echo "Usage: $0 [install|dev|build|start|clean]" >&2
+    exit 1
+    ;;
+esac

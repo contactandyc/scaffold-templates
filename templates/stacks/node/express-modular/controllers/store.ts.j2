@@ -1,0 +1,43 @@
+{#- scaffold-repo: { dest: "src/controllers/store.{{ 'ts' if use_typescript == 'yes' else 'js' }}" } -#}
+{% if kv_backend != 'None' %}
+// SPDX-FileCopyrightText: {{ year | default('2026') }} {{ author | default('Andy Curtis <contactandyc@gmail.com>') }}
+// SPDX-License-Identifier: Apache-2.0
+//
+// Maintainer: {{ author | default('Andy Curtis <contactandyc@gmail.com>') }}
+
+{% if use_typescript == 'yes' %}
+import { Request, Response } from 'express';
+{% endif %}
+import * as StoreService from '../services/store';
+
+export const createOrUpdate = async (req{% if use_typescript == 'yes' %}: Request{% endif %}, res{% if use_typescript == 'yes' %}: Response{% endif %}){% if use_typescript == 'yes' %}: Promise<void>{% endif %} => {
+  const { key, value } = req.body;
+  if (!key || value === undefined) {
+    res.status(400).json({ error: 'Both "key" and "value" are required in the request body.' });
+    return;
+  }
+  await StoreService.setItem(key, String(value));
+  res.status(201).json({ message: 'Saved successfully', key, value: await StoreService.getItem(key) });
+};
+
+export const retrieve = async (req{% if use_typescript == 'yes' %}: Request{% endif %}, res{% if use_typescript == 'yes' %}: Response{% endif %}){% if use_typescript == 'yes' %}: Promise<void>{% endif %} => {
+  const { key } = req.params;
+  const exists = await StoreService.hasItem(key);
+  if (!exists) {
+    res.status(404).json({ error: `Key '${key}' not found.` });
+    return;
+  }
+  res.status(200).json({ key, value: await StoreService.getItem(key) });
+};
+
+export const remove = async (req{% if use_typescript == 'yes' %}: Request{% endif %}, res{% if use_typescript == 'yes' %}: Response{% endif %}){% if use_typescript == 'yes' %}: Promise<void>{% endif %} => {
+  const { key } = req.params;
+  const exists = await StoreService.hasItem(key);
+  if (!exists) {
+    res.status(404).json({ error: `Key '${key}' not found.` });
+    return;
+  }
+  await StoreService.deleteItem(key);
+  res.status(204).send();
+};
+{% endif %}

@@ -1,0 +1,22 @@
+{#- scaffold-repo: { dest: "src/controllers/external.{{ 'ts' if use_typescript == 'yes' else 'js' }}" } -#}
+{% if include_external_api == 'yes' %}
+// SPDX-FileCopyrightText: {{ year | default('2026') }} {{ author | default('Andy Curtis <contactandyc@gmail.com>') }}
+// SPDX-License-Identifier: Apache-2.0
+//
+// Maintainer: {{ author | default('Andy Curtis <contactandyc@gmail.com>') }}
+
+{% if use_typescript == 'yes' %}
+import { Request, Response } from 'express';
+{% endif %}
+import { fetchUserData } from '../services/external';
+
+export const getExternalUser = async (req{% if use_typescript == 'yes' %}: Request{% endif %}, res{% if use_typescript == 'yes' %}: Response{% endif %}){% if use_typescript == 'yes' %}: Promise<void>{% endif %} => {
+  try {
+    const userId = req.params.id || '1';
+    const data = await fetchUserData(userId);
+    res.status(200).json({ source: 'external-api', data });
+  } catch (error{% if use_typescript == 'yes' %}: any{% endif %}) {
+    res.status(502).json({ error: 'Bad Gateway', message: error.message });
+  }
+};
+{% endif %}

@@ -1,0 +1,33 @@
+{#- scaffold-repo: { dest: "src/websockets/index.{{ 'ts' if use_typescript == 'yes' else 'js' }}" } -#}
+{% if include_websockets == 'yes' %}
+// SPDX-FileCopyrightText: {{ year | default('2026') }} {{ author | default('Andy Curtis <contactandyc@gmail.com>') }}
+// SPDX-License-Identifier: Apache-2.0
+//
+// Maintainer: {{ author | default('Andy Curtis <contactandyc@gmail.com>') }}
+
+{% if use_typescript == 'yes' %}
+import { Server as HttpServer } from 'http';
+{% endif %}
+import { Server } from 'socket.io';
+
+export const setupWebSockets = (server{% if use_typescript == 'yes' %}: HttpServer{% endif %}){% if use_typescript == 'yes' %}: Server{% endif %} => {
+  const io = new Server(server, {
+    cors: { origin: '*' } // Be sure to lock this down in production!
+  });
+
+  io.on('connection', (socket) => {
+    console.log(`🔗 WebSocket client connected: ${socket.id}`);
+
+    // Example listener: Echo back a ping
+    socket.on('ping', (data) => {
+      socket.emit('pong', { message: 'pong', serverTime: new Date().toISOString(), received: data });
+    });
+
+    socket.on('disconnect', () => {
+      console.log(`❌ WebSocket client disconnected: ${socket.id}`);
+    });
+  });
+
+  return io;
+};
+{% endif %}

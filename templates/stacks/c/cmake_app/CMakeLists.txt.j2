@@ -58,14 +58,9 @@ target_include_directories({{ tgt.name }} PRIVATE
 set_target_properties({{ tgt.name }} PROPERTIES
   C_STANDARD {{ tgt.c_standard | default(c_standard) | default(23) }}
   C_STANDARD_REQUIRED YES
+  CXX_STANDARD {{ tgt.cxx_standard | default(cxx_standard) | default(17) }}
+  CXX_STANDARD_REQUIRED YES
 )
-
-if("CXX" IN_LIST CMAKE_PROJECT_LANGUAGES)
-  set_target_properties({{ tgt.name }} PROPERTIES
-    CXX_STANDARD {{ tgt.cxx_standard | default(cxx_standard) | default(17) }}
-    CXX_STANDARD_REQUIRED YES
-  )
-endif()
 
 target_link_libraries({{ tgt.name }} PRIVATE
 {% for l in main_ctx.link_libraries | default([]) %}
@@ -86,10 +81,6 @@ install(TARGETS {{ tgt.name }}
 
 # Extra project-specific targets
 {{ extra_targets | default("") }}
-
-{% if tests %}
-enable_testing()
-{% endif %}
 
 # Dynamically mount all subprojects (apps, examples, tests, etc.)
 {% for subdir in active_subprojects | default([]) %}

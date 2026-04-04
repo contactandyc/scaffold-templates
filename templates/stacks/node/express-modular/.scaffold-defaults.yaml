@@ -1,0 +1,31 @@
+kind: git
+
+build_steps:
+  - ./build.sh clean
+  - ./build.sh install
+
+create_prompts:
+  - var: pkg_manager
+    prompt: "Which package manager?"
+    default: "npm"
+    options: ["npm", "yarn", "pnpm"]
+
+  - var: use_typescript
+    prompt: "Use TypeScript?"
+    default: "yes"
+    options: ["yes", "no"]
+
+  - var: kv_backend
+    prompt: "Select Storage Backend:"
+    default: "internal"
+    options: ["internal", "postgres", "redis"]
+
+  - var: include_external_api
+    prompt: "Include example external API proxy?"
+    default: "yes"
+    options: ["yes", "no"]
+
+  - var: include_websockets
+    prompt: "Include WebSockets (Socket.io)?"
+    default: "yes"
+    options: ["yes", "no"]
