@@ -75,7 +75,7 @@ if(A_ENABLE_COVERAGE)
   endif()
 endif()
 
-option(A_BUILD_ENABLE_MEMORY_PROFILE "Define a macro on the 'memory' variant" OFF)
+option(A_BUILD_ENABLE_MEMORY_PROFILE "Define a macro on the 'memory' variant" ON)
 set(A_BUILD_MEMORY_DEFINE "_AML_DEBUG_" CACHE STRING
     "Macro to define on the 'memory' variant when memory profiling is enabled")
 
@@ -131,15 +131,10 @@ target_include_directories({{ tgt.name }}_{{ variant }} PUBLIC
 set_target_properties({{ tgt.name }}_{{ variant }} PROPERTIES
   C_STANDARD {{ tgt.c_standard | default(c_standard) | default(99) }}
   C_STANDARD_REQUIRED YES
+  CXX_STANDARD {{ tgt.cxx_standard | default(cxx_standard) | default(17) }}
+  CXX_STANDARD_REQUIRED YES
   POSITION_INDEPENDENT_CODE {{ pic | default(true) | ternary("ON","OFF") }}
 )
-
-if("CXX" IN_LIST CMAKE_PROJECT_LANGUAGES)
-  set_target_properties({{ tgt.name }}_{{ variant }} PROPERTIES
-    CXX_STANDARD {{ tgt.cxx_standard | default(cxx_standard) | default(17) }}
-    CXX_STANDARD_REQUIRED YES
-  )
-endif()
 
 target_link_libraries({{ tgt.name }}_{{ variant }} PUBLIC
 {% for l in deps.link_libraries | default([]) %}
@@ -188,6 +183,17 @@ set(_CFG_IN "${CMAKE_CURRENT_BINARY_DIR}/config.cmake.in")
 file(WRITE "${_CFG_IN}" [=[
 @PACKAGE_INIT@
 include(CMakeFindDependencyMacro)
+
+{% if deps.pkg_config_deps %}
+# Re-resolve PkgConfig dependencies for consumers
+find_package(PkgConfig REQUIRED)
+{% for dep in deps.pkg_config_deps %}
+pkg_check_modules(PC_{{ dep.target | upper }} REQUIRED IMPORTED_TARGET {{ dep.module }})
+if(NOT TARGET {{ dep.target }})
+  add_library({{ dep.target }} ALIAS PkgConfig::PC_{{ dep.target | upper }})
+endif()
+{% endfor %}
+{% endif %}
 
 if(NOT DEFINED A_BUILD_VARIANT OR A_BUILD_VARIANT STREQUAL "")
   set(A_BUILD_VARIANT "debug")

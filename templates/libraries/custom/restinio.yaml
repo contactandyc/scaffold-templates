@@ -14,3 +14,4 @@ find_package: "restinio REQUIRED"
 link: "restinio::restinio"
 license_spdx: BSD-3-Clause
 attribution: "restinio by Stiffstream — BSD-3-Clause"
+language: C CXX
