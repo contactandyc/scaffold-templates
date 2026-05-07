@@ -36,6 +36,10 @@ case "$COMMAND" in
   bootstrap)
     echo "--- Bootstrapping Hermetic Workspace ---"
 
+    # --- FAILSAFE: Shield against leaky parent environments ---
+    export PREFIX="$PWD/repos/install"
+    export WORKSPACE_DIR="$PWD/repos"
+
     # 1. Fetch the scaffolding engine to disk so it is visible and editable
     mkdir -p repos
     if [ ! -d "repos/scaffold-repo" ]; then
@@ -53,14 +57,13 @@ case "$COMMAND" in
         python3 -m venv .scaffold/venv
         source .scaffold/venv/bin/activate
         pip install --upgrade pip -q
-
-        echo "Installing scaffold engine into sandbox..."
-        # This installs the CLI commands strictly into .scaffold/venv/bin
-        # Editable mode (-e) means it runs directly from the repos/scaffold-repo source folder!
-        pip install -q -e repos/scaffold-repo
     else
         source .scaffold/venv/bin/activate
     fi
+
+    # ALWAYS sync the engine's entry points into the sandbox
+    echo "Installing scaffold engine into sandbox..."
+    pip install -q -e repos/scaffold-repo
 
     # 3. Generate local hermetic configs & clone dependencies recursively
     scaffold-bootstrap
@@ -70,7 +73,9 @@ case "$COMMAND" in
 
     echo ""
     echo "✅ Bootstrap complete! All dependencies are isolated in your workspace."
-    echo "   Run './build.sh build' to compile this project."
+
+    # Automatically cascade into a first-party build!
+    "$0" build
     ;;
 
   build|install)
