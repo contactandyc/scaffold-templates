@@ -51,7 +51,7 @@ link: "{{ project_snake }}::{{ project_snake }}"
 init_prompts:
   - var: BUILD_VARIANT
     prompt: "Which library variant should executables link against?"
-    default: "static"
+    default: "memory"
     options: ["debug", "memory", "static", "shared"]
 
 # ── Core C Routing & Contexts ──

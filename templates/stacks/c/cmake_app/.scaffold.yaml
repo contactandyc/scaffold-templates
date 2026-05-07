@@ -44,7 +44,7 @@ link: null
 create_prompts:
   - var: BUILD_VARIANT
     prompt: "Which library variant should this application link against?"
-    default: "static"
+    default: "memory"
     options: ["debug", "memory", "static", "shared"]
 
   - var: ubuntu_tag

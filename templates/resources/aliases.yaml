@@ -1,5 +1,6 @@
 andy-curtis:
   - https://github.com/contactandyc/a-bitset-library.git
+  - https://github.com/contactandyc/a-curl-gcloud-plugin.git
   - https://github.com/contactandyc/a-curl-library.git
   - https://github.com/contactandyc/a-curl-openai-plugin.git
   - https://github.com/contactandyc/a-json-library.git
@@ -7,6 +8,7 @@ andy-curtis:
   - https://github.com/contactandyc/a-json-schema-builder-library.git
   - https://github.com/contactandyc/a-map-reduce-library.git
   - https://github.com/contactandyc/a-memory-library.git
+  - https://github.com/contactandyc/a-raft-library.git
   - https://github.com/contactandyc/a-sentence-chunker-library.git
   - https://github.com/contactandyc/a-tokenizer-library.git
   - https://github.com/contactandyc/an-encryption-library.git
@@ -19,3 +21,4 @@ andy-curtis:
   - https://github.com/contactandyc/the-io-library.git
   - https://github.com/contactandyc/the-lz4-library.git
   - https://github.com/contactandyc/the-macro-library.git
+  - https://github.com/contactandyc/mail.git

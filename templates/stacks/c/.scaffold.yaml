@@ -11,7 +11,7 @@ init_prompts:
 
   - var: BUILD_TYPE
     prompt: "Select default CMake build type:"
-    default: "Release"
+    default: "Debug"
     options: ["Release", "Debug", "RelWithDebInfo", "MinSizeRel"]
 
 create_prompts:
