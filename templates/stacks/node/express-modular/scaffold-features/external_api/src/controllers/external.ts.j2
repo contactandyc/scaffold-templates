@@ -1,0 +1,12 @@
+import { Request, Response } from 'express';
+import { fetchUserData } from '../services/external';
+
+export const getExternalUser = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const userId = req.params.id || '1';
+    const data = await fetchUserData(userId);
+    res.status(200).json({ source: 'external-api', data });
+  } catch (error: any) {
+    res.status(502).json({ error: 'Bad Gateway', message: error.message });
+  }
+};

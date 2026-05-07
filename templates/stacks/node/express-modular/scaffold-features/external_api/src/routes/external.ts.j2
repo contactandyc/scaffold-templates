@@ -1,0 +1,7 @@
+import { Router } from 'express';
+import { getExternalUser } from '../controllers/external';
+
+const router = Router();
+router.get('/user/:id', getExternalUser);
+
+export default router;

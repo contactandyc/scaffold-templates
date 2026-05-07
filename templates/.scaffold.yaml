@@ -46,5 +46,4 @@ template_rules:
   # 3. Universal Exceptions
   - match:
       - "README.md"
-      - ".gitignore"
     updatable: false
