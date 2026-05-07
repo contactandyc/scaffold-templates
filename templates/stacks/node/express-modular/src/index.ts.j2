@@ -1,0 +1,66 @@
+import 'dotenv/config';
+import express from 'express';
+import cors from 'cors';
+{% if websockets == 'yes' %}
+import http from 'http';
+{% endif %}
+import healthRouter from './routes/health';
+import storeRouter from './routes/store';
+import { init as initStore } from './services/store';
+{% if external_api == 'yes' %}
+import externalRouter from './routes/external';
+{% endif %}
+{% if websockets == 'yes' %}
+import { setupWebSockets } from './websockets';
+{% endif %}
+{% if jwt_auth in ['yes', true, 'true', 'True'] %}
+import authRouter from './routes/auth';
+import { initAuth } from './services/auth';
+{% endif %}
+
+const app = express();
+const port = process.env.PORT || 8080;
+
+{% if websockets == 'yes' %}
+// Wrap Express in a native Node HTTP server to attach Socket.io
+const server = http.createServer(app);
+setupWebSockets(server);
+{% endif %}
+
+app.use(cors());
+app.use(express.json());
+
+{% if jwt_auth in ['yes', true, 'true', 'True'] %}
+app.use('/api/auth', authRouter);
+{% endif %}
+
+// Mount the modular routes
+app.use('/api/health', healthRouter);
+app.use('/api/store', storeRouter);
+{% if external_api == 'yes' %}
+app.use('/api/proxy', externalRouter);
+{% endif %}
+
+const boot = async () => {
+  try {
+    await initStore();
+    {% if jwt_auth in ['yes', true, 'true', 'True'] %}
+    await initAuth();
+    {% endif %}
+
+    {% if websockets in ['yes', true, 'true', 'True'] %}
+    server.listen(port, () => {
+      console.log(`🚀 Server running on http://localhost:${port}`);
+    });
+    {% else %}
+    app.listen(port, () => {
+      console.log(`🚀 Server running on http://localhost:${port}`);
+    });
+    {% endif %}
+  } catch (err) {
+    console.error("❌ Failed to initialize services:", err);
+    process.exit(1);
+  }
+};
+
+boot();

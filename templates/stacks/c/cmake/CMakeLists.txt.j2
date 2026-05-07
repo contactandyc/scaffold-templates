@@ -7,6 +7,11 @@ project({{ project_snake }}
   LANGUAGES {{ language | default("C") }}
 )
 
+if(CMAKE_PREFIX_PATH)
+  include_directories("${CMAKE_PREFIX_PATH}/include")
+  link_directories("${CMAKE_PREFIX_PATH}/lib")
+endif()
+
 {%- if kind | default('compiled') == "header_only" %}
 
 # ── Header-only target ─────────────────────────────────────────────────────────
@@ -251,10 +256,13 @@ install(FILES
 {{ extra_targets | default("") }}
 
 {% if tests %}
-enable_testing()
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/tests")
+  enable_testing()
+  add_subdirectory("tests")
+endif()
 {% endif %}
 
 # Dynamically mount all subprojects (apps, examples, tests, etc.)
-{% for subdir in active_subprojects | default([]) %}
-add_subdirectory({{ subdir }})
-{% endfor %}
+# {% for subdir in active_subprojects | default([]) %}
+# add_subdirectory({{ subdir }})
+# {% endfor %}

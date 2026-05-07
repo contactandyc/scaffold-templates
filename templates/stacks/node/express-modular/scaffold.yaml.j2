@@ -1,0 +1,31 @@
+{% extends "base/scaffold.yaml.j2" %}
+
+{% block extra_config %}
+# ── Feature Flags & Overrides ──
+# Toggle optional scaffolding features on or off.
+# Run `scaffold-repo --update` to apply changes!
+features:
+{% if kv_backend and kv_backend not in ['None', ''] %}
+  {{ kv_backend | lower }}: true
+{% endif %}
+{% if external_api in ['yes', true, 'true', 'True'] %}
+  external_api: true
+{% endif %}
+{% if websockets in ['yes', true, 'true', 'True'] %}
+  websockets: true
+{% endif %}
+{% if jwt_auth in ['yes', true, 'true', 'True'] %}
+  jwt_auth: true
+{% endif %}
+{% if jwt_auth in ['yes', true, 'true', 'True'] %}
+  # Core auth logic (routes, controllers, middleware)
+  jwt_auth: true
+  # Intersection auth logic (database-specific services)
+  {% set _kv = kv_backend | lower %}
+  {% if _kv and _kv != 'none' %}
+  jwt_auth_{{ _kv if _kv != '' else 'internal' }}: true
+  {% else %}
+  jwt_auth_internal: true
+  {% endif %}
+{% endif %}
+{% endblock %}

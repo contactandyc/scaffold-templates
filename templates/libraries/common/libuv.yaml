@@ -3,8 +3,18 @@ url: https://github.com/libuv/libuv.git
 branch: v1.48.0
 shallow: true
 build_steps:
-  - cmake -S . -B build -DCMAKE_INSTALL_PREFIX=/usr/local -DBUILD_TESTING=OFF
+  - cmake -S . -B build -DCMAKE_INSTALL_PREFIX=${PREFIX:-/usr/local} -DBUILD_TESTING=OFF
   - cmake --build build -j"$(nproc)"
-  - sudo cmake --install build
+  - ${SUDO}cmake --install build
 find_package: "libuv CONFIG REQUIRED"
 link: "libuv::uv"
+
+license_spdx: MIT
+attribution: "libuv by libuv contributors — MIT"
+
+notices:
+  - |
+    LIBUV:
+    This software uses libuv (https://github.com/libuv/libuv).
+    libuv is licensed under the MIT License.
+    Copyright (c) 2015-present libuv project contributors.

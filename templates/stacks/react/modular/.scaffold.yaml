@@ -1,0 +1,28 @@
+create_prompts:
+  - var: external_api
+    prompt: "Include External API UI Components?"
+    default: "yes"
+    options: ["yes", "no"]
+
+  - var: websockets
+    prompt: "Include WebSocket UI Components?"
+    default: "yes"
+    options: ["yes", "no"]
+
+  - var: api_port
+    prompt: "Backend API Port:"
+    default: "8080"
+
+  - var: jwt_auth
+    prompt: "Include JWT Authentication (Login/Register)?"
+    default: "yes"
+    options: ["yes", "no"]
+
+template_rules:
+  # Allow the root DOM injector to receive upstream React/Vite updates
+  - match: "src/main.tsx"
+    updatable: true
+
+  # Protect the main routing App component
+  - match: "src/App.tsx"
+    updatable: false

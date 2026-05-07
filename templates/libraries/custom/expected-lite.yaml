@@ -3,8 +3,18 @@ url: https://github.com/contactandyc/restinio.git
 branch: v.0.7.3-fork
 shallow: true
 build_steps:
-  - cmake -S expected-lite -B expected-lite/build -DCMAKE_INSTALL_PREFIX=/usr/local
+  - cmake -S expected-lite -B expected-lite/build -DCMAKE_INSTALL_PREFIX=${PREFIX:-/usr/local}
   - cmake --build expected-lite/build -j"$(nproc)"
-  - sudo cmake --install expected-lite/build
+  - ${SUDO}cmake --install expected-lite/build
 find_package: "expected-lite CONFIG REQUIRED"
 link: "nonstd::expected-lite"
+
+license_spdx: BSL-1.0
+attribution: "expected-lite by Martin Moene — BSL-1.0"
+
+notices:
+  - |
+    EXPECTED-LITE:
+    This software uses expected-lite (https://github.com/martinmoene/expected-lite).
+    expected-lite is licensed under the Boost Software License, Version 1.0.
+    Copyright 2017-present Martin Moene.

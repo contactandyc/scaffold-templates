@@ -1,0 +1,25 @@
+{#- scaffold-repo: { dest: "src/components/HealthCheck.tsx" } -#}
+import { useState } from 'react';
+import { API_BASE_URL } from '../config';
+
+export function HealthCheck() {
+  const [status, setStatus] = useState<string | null>(null);
+
+  const checkHealth = async () => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/health`);
+      const data = await res.json();
+      setStatus(JSON.stringify(data, null, 2));
+    } catch (e: any) {
+      setStatus(`Error: ${e.message}`);
+    }
+  };
+
+  return (
+    <div style={ { border: '1px solid #ccc', padding: '15px', borderRadius: '8px' } }>
+      <h2>System Health</h2>
+      <button onClick={checkHealth} style={ { padding: '8px 16px', cursor: 'pointer' } }>Ping API</button>
+      {status && <pre style={ { background: '#f4f4f4', padding: '10px', marginTop: '10px' } }>{status}</pre>}
+    </div>
+  );
+}

@@ -1,0 +1,42 @@
+{#- scaffold-repo: { dest: "README.md" } -#}
+## 🚀 Quick Start
+
+**1. Install Dependencies**
+```bash
+./build.sh install
+```
+
+**2. Start the Development Server**
+```bash
+./build.sh dev
+```
+The Vite development server will start (usually on `http://localhost:5173`).
+
+---
+
+## 🏗️ Project Architecture
+
+This is a modular React Single Page Application (SPA) built with Vite and TypeScript. It is designed to connect seamlessly with your Express backend.
+
+### Connecting to the Backend
+The API and WebSocket URLs are configured in `src/config.ts`. By default, they point to `http://localhost:{{ api_port | default('8080') }}`.
+
+### Included Features
+* **Health Check:** Pings the backend to ensure the API is reachable.
+* **Key/Value Store Manager:** A UI to Create, Read, and Delete items from the backend database.
+{% if external_api in ['yes', true, 'true', 'True'] %}
+* **External API Proxy:** Demonstrates fetching and rendering complex nested JSON data through the backend.
+{% endif %}
+{% if websockets in ['yes', true, 'true', 'True'] %}
+* **WebSocket Client:** Connects to the backend Socket.io server to send and receive real-time events.
+{% endif %}
+
+---
+
+## 📜 Available Scripts
+
+* `./build.sh install`: Installs dependencies via npm.
+* `./build.sh dev`: Starts the local Vite development server with HMR.
+* `./build.sh build`: Type-checks and bundles the app for production into the `dist/` folder.
+* `./build.sh preview`: Boots up a local static web server to preview the `dist/` folder.
+* `./build.sh clean`: Removes `node_modules` and build artifacts.

@@ -1,0 +1,31 @@
+create_prompts:
+  - var: kv_backend
+    prompt: "Select Storage Backend:"
+    default: "internal"
+    options: ["internal", "postgres", "redis"]
+
+  - var: external_api
+    prompt: "Include example external API proxy?"
+    default: "yes"
+    options: ["yes", "no"]
+
+  - var: websockets
+    prompt: "Include WebSockets (Socket.io)?"
+    default: "yes"
+    options: ["yes", "no"]
+
+  - var: jwt_auth
+    prompt: "Include JWT Authentication (Login/Register)?"
+    default: "yes"
+    options: ["yes", "no"]
+
+template_rules:
+  # The Express bootstrapper is safely updatable
+  - match: "src/index.ts"
+    updatable: true
+
+feature_rules:
+  jwt_auth:
+    # If auth is injected, allow upstream patches to the security middleware
+    - match: "src/middlewares/requireAuth.ts"
+      updatable: true

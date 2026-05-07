@@ -1,0 +1,28 @@
+import { createClient } from 'redis';
+
+const client = createClient({
+  url: process.env.REDIS_URL || 'redis://localhost:6379'
+});
+
+client.on('error', (err: any) => console.error('Redis Client Error', err));
+
+export const init = async (): Promise<void> => {
+  await client.connect();
+  console.log('📦 Redis KV Client Connected');
+};
+
+export const setItem = async (key: string, value: string): Promise<void> => {
+  await client.set(key, value);
+};
+
+export const getItem = async (key: string): Promise<string | null> => {
+  return await client.get(key);
+};
+
+export const deleteItem = async (key: string): Promise<void> => {
+  await client.del(key);
+};
+
+export const hasItem = async (key: string): Promise<boolean> => {
+  return (await client.exists(key)) === 1;
+};

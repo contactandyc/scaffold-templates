@@ -1,0 +1,73 @@
+{#- scaffold-repo: { dest: "src/components/WebSocketPing.tsx" } -#}
+import { useEffect, useState } from 'react';
+import { io, Socket } from 'socket.io-client';
+import { WS_BASE_URL } from '../config';
+
+export function WebSocketPing() {
+  const [socket, setSocket] = useState<Socket | null>(null);
+  const [messages, setMessages] = useState<string[]>([]);
+  const [connected, setConnected] = useState(false);
+
+  useEffect(() => {
+    const newSocket = io(WS_BASE_URL);
+
+    newSocket.on('connect', () => {
+      setConnected(true);
+      setMessages(prev => [...prev, `Connected to WS server (${newSocket.id})`]);
+    });
+
+    newSocket.on('pong', (data) => {
+      setMessages(prev => [...prev, `Server responded: ${JSON.stringify(data)}`]);
+    });
+
+    newSocket.on('disconnect', () => {
+      setConnected(false);
+      setMessages(prev => [...prev, 'Disconnected from WS server']);
+    });
+
+    setSocket(newSocket);
+
+    return () => {
+      newSocket.close();
+    };
+  }, []);
+
+  const sendPing = () => {
+    if (socket && connected) {
+      socket.emit('ping', { timestamp: new Date().toISOString() });
+    }
+  };
+
+  return (
+    <div style={ { border: '1px solid #28a745', padding: '15px', borderRadius: '8px' } }>
+      <h2>WebSocket Connection</h2>
+      <div style={ { marginBottom: '10px' } }>
+        Status: <span style={ { color: connected ? 'green' : 'red', fontWeight: 'bold' } }>
+          {connected ? 'Connected' : 'Disconnected'}
+        </span>
+      </div>
+
+      <button
+        onClick={sendPing}
+        disabled={!connected}
+        style={ { marginBottom: '10px' } }
+      >
+        Send Ping
+      </button>
+
+      <div style={ {
+        height: '150px',
+        overflowY: 'auto',
+        background: '#333',
+        color: '#0f0',
+        padding: '10px',
+        fontFamily: 'monospace',
+        borderRadius: '4px'
+      } }>
+        {messages.map((msg, i) => (
+          <div key={i}>{msg}</div>
+        ))}
+      </div>
+    </div>
+  );
+}

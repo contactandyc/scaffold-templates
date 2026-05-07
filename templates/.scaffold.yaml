@@ -1,0 +1,50 @@
+# ── Git Branching Standards ──
+branch_prefixes:
+  feat: A new feature
+  fix: A bug fix
+  docs: Documentation only changes
+  refactor: A code change that neither fixes a bug nor adds a feature
+  test: Adding missing tests or correcting existing tests
+  chore: Changes to the build process or auxiliary tools
+
+# ── OSS Engine Routing ──
+features:
+  changie: false
+  jekyll-site: false
+
+# ── Dynamic Init Prompts ──
+init_prompts:
+  - var: stack
+    prompt: "Select primary stack:"
+    choices_from_dir: "stacks"
+    multiselect: true
+
+kind: git
+
+build_steps:
+  - ./build.sh clean
+  - ./build.sh install
+
+global_rules:
+  # 1. Shell scripts are always executable
+  - match: "**/*.sh"
+    executable: true
+
+  # 2. The Universal Source Code Safety Net
+  # Protects user logic from upstream updates. Late-features will still generate!
+  - match:
+      - "**/*.c"
+      - "**/*.cpp"
+      - "**/*.h"
+      - "**/*.hpp"
+      - "**/*.ts"
+      - "**/*.tsx"
+      - "**/*.py"
+    updatable: false
+
+template_rules:
+  # 3. Universal Exceptions
+  - match:
+      - "README.md"
+      - ".gitignore"
+    updatable: false

@@ -1,0 +1,33 @@
+import { Request, Response } from 'express';
+import * as StoreService from '../services/store';
+
+export const createOrUpdate = async (req: Request, res: Response): Promise<void> => {
+  const { key, value } = req.body;
+  if (!key || value === undefined) {
+    res.status(400).json({ error: 'Both "key" and "value" are required in the request body.' });
+    return;
+  }
+  await StoreService.setItem(key, String(value));
+  res.status(201).json({ message: 'Saved successfully', key, value: await StoreService.getItem(key) });
+};
+
+export const retrieve = async (req: Request, res: Response): Promise<void> => {
+  const { key } = req.params;
+  const exists = await StoreService.hasItem(key);
+  if (!exists) {
+    res.status(404).json({ error: `Key '${key}' not found.` });
+    return;
+  }
+  res.status(200).json({ key, value: await StoreService.getItem(key) });
+};
+
+export const remove = async (req: Request, res: Response): Promise<void> => {
+  const { key } = req.params;
+  const exists = await StoreService.hasItem(key);
+  if (!exists) {
+    res.status(404).json({ error: `Key '${key}' not found.` });
+    return;
+  }
+  await StoreService.deleteItem(key);
+  res.status(204).send();
+};

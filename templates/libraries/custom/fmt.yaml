@@ -3,8 +3,18 @@ url: https://github.com/contactandyc/restinio.git
 branch: v.0.7.3-fork
 shallow: true
 build_steps:
-  - cmake -S fmt -B fmt/build -DCMAKE_INSTALL_PREFIX=/usr/local
+  - cmake -S fmt -B fmt/build -DCMAKE_INSTALL_PREFIX=${PREFIX:-/usr/local}
   - cmake --build fmt/build -j"$(nproc)"
-  - sudo cmake --install fmt/build
+  - ${SUDO}cmake --install fmt/build
 find_package: "fmt REQUIRED"
 link: "fmt::fmt"
+
+license_spdx: MIT
+attribution: "fmt by Victor Zverovich — MIT"
+
+notices:
+  - |
+    FMT:
+    This software uses the fmt library (https://github.com/fmtlib/fmt).
+    fmt is licensed under the MIT License.
+    Copyright (c) 2012 - present, Victor Zverovich

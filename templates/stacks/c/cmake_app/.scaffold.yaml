@@ -1,0 +1,75 @@
+# ── 1. Global Defaults for this Stack ──
+cmake_min_version: "3.20"
+language: C
+profile: default
+cmake_base_url: "https://github.com/Kitware/CMake/releases/download"
+
+packages:
+  valgrind: true
+  gdb: true
+  perl: true
+
+# ── Generic Sub-Project Rules ──
+subproject_rules:
+  main:
+    targets_dir: "src"
+    source_globs: [ "**/*.c", "**/*.cpp", "**/*.cxx", "**/*.cc" ]
+    discovery_strategy: "aggregate"
+  apps:
+    resource: "app-resources"
+    targets_dir: "src"
+    source_globs: [ "**/*.c", "**/*.cpp" ]
+    discovery_strategy: "aggregate"
+  examples:
+    resource: "app-resources"
+    targets_dir: "src"
+    source_globs: [ "*.c", "*.cpp" ]
+    discovery_strategy: "1-to-1"
+  tests:
+    resource: "test-resources"
+    targets_dir: "src"
+    source_globs: [ "test_*.c", "test_*.cpp" ]
+    discovery_strategy: "1-to-1"
+
+# ── 2. Default Dependency/Build Behaviors ──
+kind: git
+shallow: false
+build_steps:
+  - ./build.sh clean
+  - ./build.sh install
+
+find_package: null
+link: null
+
+create_prompts:
+  - var: BUILD_VARIANT
+    prompt: "Which library variant should this application link against?"
+    default: "static"
+    options: ["debug", "memory", "static", "shared"]
+
+  - var: ubuntu_tag
+    prompt: "Ubuntu Docker base image tag:"
+    default: "22.04"
+    options: ["20.04", "22.04", "24.04"]
+
+  - var: cmake_version
+    prompt: "CMake version to install in Docker:"
+    default: "3.26.4"
+
+# ── Core C Routing & Contexts ──
+template_rules:
+  # Inject the dependency context into the build scripts
+  - match:
+      - "**/CMakeLists.txt"
+      - "**/build.sh"
+    context: "deps"
+
+  # Route library headers and source files dynamically
+  - match: "include/lib.h"
+    dest: "include/{{ project_slug }}/{{ project_snake }}.h"
+
+  - match: "src/lib.c"
+    dest: "src/{{ project_snake }}.c"
+
+  - match: "**/src/test_lib.c"
+    dest: "src/test_{{ project_snake }}.c"

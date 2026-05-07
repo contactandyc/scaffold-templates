@@ -1,0 +1,11 @@
+init_prompts:
+  - var: stack_type
+    prompt: "Select Node Target:"
+    choices_from_dir: "stacks/{{ stack }}"
+    exclude: ["base"]
+
+create_prompts:
+  - var: pkg_manager
+    prompt: "Which package manager?"
+    default: "npm"
+    options: ["npm", "yarn", "pnpm"]

@@ -1,0 +1,10 @@
+import { Router } from 'express';
+import { createOrUpdate, retrieve, remove } from '../controllers/store';
+
+const router = Router();
+
+router.post('/', createOrUpdate);
+router.get('/:key', retrieve);
+router.delete('/:key', remove);
+
+export default router;

@@ -1,0 +1,18 @@
+{% extends "base/scaffold.yaml.j2" %}
+
+{% block extra_config %}
+# ── Frontend Configuration ──
+api_port: {{ api_port | default('8080') }}
+
+# ── Feature Flags & Overrides ──
+features:
+{% if external_api in ['yes', true, 'true', 'True'] %}
+  external_api: true
+{% endif %}
+{% if websockets in ['yes', true, 'true', 'True'] %}
+  websockets: true
+{% endif %}
+{% if jwt_auth in ['yes', true, 'true', 'True'] %}
+  jwt_auth: true
+{% endif %}
+{% endblock %}

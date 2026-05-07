@@ -1,16 +1,17 @@
+{#- scaffold-repo: { dest: "build.sh", executable: true } -#}
 #!/usr/bin/env bash
 set -euo pipefail
 
 # --- Discover and source .scaffoldrc ---
 _cur="$PWD"
 while [ "$_cur" != "/" ]; do
-  if [ -f "$_cur/.scaffoldrc" ]; then
-    source "$_cur/.scaffoldrc"
+  if [ -f "$_cur/.scaffoldrc.yaml" ]; then
+    [ -f "$_cur/.scaffoldrc_{{ stack }}_{{ stack_type }}" ] && source "$_cur/.scaffoldrc_{{ stack }}_{{ stack_type }}"
     break
   fi
   _cur="$(dirname "$_cur")"
 done
-[ -z "${WORKSPACE_DIR:-}" ] && [ -f "$HOME/.scaffoldrc" ] && source "$HOME/.scaffoldrc"
+[ -z "${WORKSPACE_DIR:-}" ] && [ -f "$HOME/.scaffoldrc_{{ stack }}_{{ stack_type }}" ] && source "$HOME/.scaffoldrc_{{ stack }}_{{ stack_type }}"
 
 : "${BUILD_DIR:=build}"
 

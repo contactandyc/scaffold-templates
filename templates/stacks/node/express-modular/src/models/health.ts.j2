@@ -1,0 +1,6 @@
+export interface SystemHealth {
+  status: 'ok' | 'degraded' | 'down';
+  project: string;
+  uptime: number;
+  timestamp: string;
+}

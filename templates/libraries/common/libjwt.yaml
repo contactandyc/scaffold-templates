@@ -2,10 +2,20 @@ kind: git
 url: https://github.com/benmcollins/libjwt.git
 shallow: true
 build_steps:
-  - cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local
+  - cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=${PREFIX:-/usr/local}
   - cmake --build build -j"$(nproc)"
-  - sudo cmake --install build
-find_package: "libjwt REQUIRED"
-link: "jwt::jwt"
+  - ${SUDO}cmake --install build
+find_package: null
+pkg_config: libjwt
+link: libjwt
 depends_on:
   - system/libjansson-dev
+
+license_spdx: MPL-2.0
+attribution: "libjwt by Ben Collins — MPL-2.0"
+
+notices:
+  - |
+    LIBJWT:
+    This software uses libjwt (https://github.com/benmcollins/libjwt).
+    libjwt is licensed under the Mozilla Public License Version 2.0.

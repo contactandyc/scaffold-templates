@@ -1,0 +1,54 @@
+{#- scaffold-repo: { dest: "src/components/ExternalUser.tsx" } -#}
+import { useState } from 'react';
+import { API_BASE_URL } from '../config';
+
+export function ExternalUser() {
+  const [userId, setUserId] = useState('1');
+  const [userData, setUserData] = useState<any>(null);
+  const [loading, setLoading] = useState(false);
+
+  const fetchUser = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch(`${API_BASE_URL}/proxy/user/${userId}`);
+      const data = await res.json();
+      setUserData(data);
+    } catch (e: any) {
+      setUserData({ error: e.message });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div style={ { border: '1px solid #007bff', padding: '15px', borderRadius: '8px' } }>
+      <h2>External API Proxy</h2>
+      <div style={ { display: 'flex', gap: '10px', marginBottom: '10px' } }>
+        <input
+          type="number"
+          min="1"
+          max="10"
+          value={userId}
+          onChange={(e) => setUserId(e.target.value)}
+          style={ { padding: '8px', width: '100px' } }
+        />
+        <button onClick={fetchUser} disabled={loading}>
+          {loading ? 'Fetching...' : 'Fetch User Data'}
+        </button>
+      </div>
+
+      {userData && userData.data && (
+        <div style={ { background: '#f0f8ff', padding: '15px', borderRadius: '4px', marginTop: '10px' } }>
+          <h3 style={ { margin: '0 0 10px 0' } }>{userData.data.name}</h3>
+          <p><strong>Email:</strong> {userData.data.email}</p>
+          <p><strong>Company:</strong> {userData.data.company.name}</p>
+          <p><strong>City:</strong> {userData.data.address.city}</p>
+        </div>
+      )}
+
+      {userData && userData.error && (
+        <pre style={ { color: 'red' } }>{JSON.stringify(userData, null, 2)}</pre>
+      )}
+    </div>
+  );
+}

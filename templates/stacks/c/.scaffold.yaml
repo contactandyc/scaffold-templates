@@ -1,0 +1,34 @@
+init_prompts:
+  - var: stack_type
+    prompt: "Select C/C++ build system:"
+    choices_from_dir: "stacks/{{ stack }}"
+    exclude: ["base"]
+
+  - var: PREFIX
+    prompt: "Where should built binaries be installed?"
+    default: "./install"
+    options: ["./install", "/usr/local", "Custom (type it yourself)"]
+
+  - var: BUILD_TYPE
+    prompt: "Select default CMake build type:"
+    default: "Release"
+    options: ["Release", "Debug", "RelWithDebInfo", "MinSizeRel"]
+
+create_prompts:
+  - var: c_standard
+    prompt: "Which C Standard?"
+    default: "23"
+    options: ["99", "11", "17", "23"]
+
+  - var: cxx_standard
+    prompt: "Which C++ Standard (if mixed source)?"
+    default: "17"
+    options: ["11", "14", "17", "20", "23"]
+
+# ── Core C Routing & Contexts ──
+template_rules:
+  # Inject the dependency context into the build scripts
+  - match:
+      - "**/CMakeLists.txt"
+      - "**/build.sh"
+    context: "deps"

@@ -4,11 +4,19 @@ branch: v2.2.6
 shallow: true
 depends_on: [ system/OpenSSL, 3rd-party/libuv, system/ZLIB ]
 build_steps:
-  - cmake -S . -B build -DCMAKE_INSTALL_PREFIX=/usr/local -DWITH_MRUBY=OFF -DBUILD_SHARED_LIBS=OFF -DCMAKE_POLICY_VERSION_MINIMUM=3.5
+  - cmake -S . -B build -DCMAKE_INSTALL_PREFIX=${PREFIX:-/usr/local} -DWITH_MRUBY=OFF -DBUILD_SHARED_LIBS=OFF -DCMAKE_POLICY_VERSION_MINIMUM=3.5
   - cmake --build build -j"$(nproc)"
-  - sudo cmake --install build
+  - ${SUDO}cmake --install build
 find_package: null
 pkg_config: libh2o
 link: h2o
+
 license_spdx: MIT
 attribution: "H2O by Kazuho Oku — MIT"
+
+notices:
+  - |
+    H2O:
+    This software uses H2O (https://github.com/h2o/h2o).
+    H2O is licensed under the MIT License.
+    Copyright (c) 2014-2016 DeNA Co., Ltd., Kazuho Oku, Fastly, Inc.

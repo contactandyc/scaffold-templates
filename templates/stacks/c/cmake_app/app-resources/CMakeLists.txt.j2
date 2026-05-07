@@ -6,6 +6,11 @@ project({{ subproject_name }} LANGUAGES {{ subproject_languages | default(langua
 
 find_library(M_LIB m)
 
+if(CMAKE_PREFIX_PATH)
+  include_directories("${CMAKE_PREFIX_PATH}/include")
+  link_directories("${CMAKE_PREFIX_PATH}/lib")
+endif()
+
 {% for fp in find_packages or [] %}
 find_package({{ fp }})
 {% endfor %}

@@ -1,0 +1,56 @@
+{#- scaffold-repo: { dest: "src/services/auth.ts" } -#}
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
+import { Client } from 'pg';
+
+const JWT_SECRET = process.env.JWT_SECRET || 'super-secret-development-key';
+const SALT_ROUNDS = 10;
+
+const client = new Client({
+  connectionString: process.env.DATABASE_URL || 'postgresql://user:password@localhost:5432/storedb'
+});
+
+// Note: In a real app, connection logic should be centralized.
+client.connect().catch(console.error);
+
+export const initAuth = async (): Promise<void> => {
+  await client.query(`
+    CREATE TABLE IF NOT EXISTS users (
+      id SERIAL PRIMARY KEY,
+      username VARCHAR(255) UNIQUE NOT NULL,
+      password_hash VARCHAR(255) NOT NULL
+    );
+  `);
+  console.log('🔐 Postgres Auth Table Initialized');
+};
+
+export const registerUser = async (username: string, passwordRaw: string) => {
+  const hashedPassword = await bcrypt.hash(passwordRaw, SALT_ROUNDS);
+
+  try {
+    const result = await client.query(
+      'INSERT INTO users (username, password_hash) VALUES ($1, $2) RETURNING id, username',
+      [username, hashedPassword]
+    );
+    return result.rows[0];
+  } catch (err: any) {
+    if (err.code === '23505') throw new Error('User already exists');
+    throw err;
+  }
+};
+
+export const loginUser = async (username: string, passwordRaw: string) => {
+  const result = await client.query('SELECT id, username, password_hash FROM users WHERE username = $1', [username]);
+  const user = result.rows[0];
+
+  if (!user) throw new Error('Invalid username or password');
+
+  const isMatch = await bcrypt.compare(passwordRaw, user.password_hash);
+  if (!isMatch) throw new Error('Invalid username or password');
+
+  return jwt.sign(
+    { id: user.id, username: user.username },
+    JWT_SECRET,
+    { expiresIn: '24h' }
+  );
+};

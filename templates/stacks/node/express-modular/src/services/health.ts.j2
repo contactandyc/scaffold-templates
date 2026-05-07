@@ -1,0 +1,11 @@
+import { SystemHealth } from '../models/health';
+
+export const checkHealthStatus = async (): Promise<SystemHealth> => {
+  // In a real app, this might check DB connectivity, Redis ping, etc.
+  return {
+    status: 'ok',
+    project: '{{ project_slug }}',
+    uptime: process.uptime(),
+    timestamp: new Date().toISOString()
+  };
+};

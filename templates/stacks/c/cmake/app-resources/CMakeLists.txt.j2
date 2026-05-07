@@ -4,6 +4,11 @@ cmake_minimum_required(VERSION {{ cmake_min_version | default("3.20") }})
 # A dynamically generated {{ subproject_block }} project.
 project({{ subproject_name }} LANGUAGES {{ subproject_languages | default(language | default("C")) }})
 
+if(CMAKE_PREFIX_PATH)
+  include_directories("${CMAKE_PREFIX_PATH}/include")
+  link_directories("${CMAKE_PREFIX_PATH}/lib")
+endif()
+
 find_library(M_LIB m)
 
 {% for fp in find_packages or [] %}
@@ -36,7 +41,7 @@ set_target_properties({{ tgt.name }} PROPERTIES
 if(NOT TARGET {{ project_snake }}::{{ project_snake }})
   find_package({{ project_snake }} CONFIG REQUIRED)
 endif()
-target_link_libraries({{ tgt.name }} PRIVATE {{ project_snake }}::{{ project_snake }})
+# target_link_libraries({{ tgt.name }} PRIVATE {{ project_snake }}::{{ project_snake }})
 {% endif %}
 
 target_link_libraries({{ tgt.name }} PRIVATE

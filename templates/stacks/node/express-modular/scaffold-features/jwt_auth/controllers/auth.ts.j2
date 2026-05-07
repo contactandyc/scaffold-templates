@@ -1,0 +1,31 @@
+{#- scaffold-repo: { dest: "src/controllers/auth.ts" } -#}
+import { Request, Response } from 'express';
+import * as AuthService from '../services/auth';
+
+export const register = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { username, password } = req.body;
+    if (!username || !password) {
+      res.status(400).json({ error: 'Username and password required' });
+      return;
+    }
+    const user = await AuthService.registerUser(username, password);
+    res.status(201).json({ message: 'User created', user: { id: user.id, username: user.username } });
+  } catch (err: any) {
+    res.status(400).json({ error: err.message });
+  }
+};
+
+export const login = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { username, password } = req.body;
+    const token = await AuthService.loginUser(username, password);
+    res.status(200).json({ token });
+  } catch (err: any) {
+    res.status(401).json({ error: err.message });
+  }
+};
+
+export const getMe = async (req: Request, res: Response): Promise<void> => {
+  res.status(200).json({ user: (req as any).user });
+};

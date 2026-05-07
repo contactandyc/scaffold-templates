@@ -1,0 +1,5 @@
+create_prompts:
+  - var: is_cli_app
+    prompt: "Is this a CLI Application (requires pipx) or a standard Library?"
+    default: "Library"
+    options: ["CLI Application", "Library"]

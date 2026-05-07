@@ -1,0 +1,73 @@
+{#- scaffold-repo: { dest: "src/components/StoreManager.tsx" } -#}
+import { useState } from 'react';
+import { API_BASE_URL } from '../config';
+
+export function StoreManager() {
+  const [key, setKey] = useState('');
+  const [value, setValue] = useState('');
+  const [output, setOutput] = useState<string | null>(null);
+
+  const handleSave = async () => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/store`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key, value }),
+      });
+      const data = await res.json();
+      setOutput(JSON.stringify(data, null, 2));
+    } catch (e: any) {
+      setOutput(`Error: ${e.message}`);
+    }
+  };
+
+  const handleLoad = async () => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/store/${key}`);
+      const data = await res.json();
+      setOutput(JSON.stringify(data, null, 2));
+    } catch (e: any) {
+      setOutput(`Error: ${e.message}`);
+    }
+  };
+
+  const handleDelete = async () => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/store/${key}`, { method: 'DELETE' });
+      if (res.status === 204) {
+        setOutput('Key deleted successfully.');
+      } else {
+        const data = await res.json();
+        setOutput(JSON.stringify(data, null, 2));
+      }
+    } catch (e: any) {
+      setOutput(`Error: ${e.message}`);
+    }
+  };
+
+  return (
+    <div style={ { border: '1px solid #ccc', padding: '15px', borderRadius: '8px' } }>
+      <h2>Key/Value Store</h2>
+      <div style={ { display: 'flex', gap: '10px', marginBottom: '10px' } }>
+        <input
+          placeholder="Key"
+          value={key}
+          onChange={(e) => setKey(e.target.value)}
+          style={ { padding: '8px', flex: 1 } }
+        />
+        <input
+          placeholder="Value"
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+          style={ { padding: '8px', flex: 1 } }
+        />
+      </div>
+      <div style={ { display: 'flex', gap: '10px' } }>
+        <button onClick={handleSave}>Save</button>
+        <button onClick={handleLoad}>Load</button>
+        <button onClick={handleDelete} style={ { color: 'red' } }>Delete</button>
+      </div>
+      {output && <pre style={ { background: '#f4f4f4', padding: '10px', marginTop: '10px' } }>{output}</pre>}
+    </div>
+  );
+}

@@ -1,0 +1,37 @@
+{#- scaffold-repo: { dest: "build.sh", executable: true } -#}
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+COMMAND="${1:-build}"
+PKG_MGR="npm"
+
+case "$COMMAND" in
+  install)
+    echo "--- Installing JS Dependencies ($PKG_MGR) ---"
+    $PKG_MGR install
+    ;;
+  dev)
+    echo "--- Starting Vite Dev Server ---"
+    if [ ! -d "node_modules" ]; then "$0" install; fi
+    $PKG_MGR run dev
+    ;;
+  build)
+    echo "--- Building Production SPA ---"
+    if [ ! -d "node_modules" ]; then "$0" install; fi
+    $PKG_MGR run build
+    echo "✅ Build complete. Artifacts are in 'dist/'"
+    ;;
+  preview)
+    echo "--- Previewing Production Build ---"
+    $PKG_MGR run preview
+    ;;
+  clean)
+    echo "--- Cleaning Workspace ---"
+    rm -rf node_modules dist .eslintcache
+    echo "✅ Clean complete."
+    ;;
+  *)
+    echo "Usage: $0 [install|dev|build|preview|clean]" >&2
+    exit 1
+    ;;
+esac

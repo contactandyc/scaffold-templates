@@ -1,3 +1,4 @@
+{#- scaffold-repo: { dest: "README.md" } -#}
 ## 🚀 Quick Start
 
 **1. Install Dependencies**
@@ -34,12 +35,8 @@ This project strictly enforces a **Modular 3-Tier Architecture** (also known as 
 * **`src/routes/`**: Defines the HTTP endpoints and HTTP verbs (GET, POST, etc.). Routes contain **no logic**; they simply pass the request to a Controller.
 * **`src/controllers/`**: Extracts data from the HTTP request (`req.body`, `req.params`), calls the appropriate Service, and formats the HTTP response (`res.status().json()`).
 * **`src/services/`**: The heart of the application. Contains pure business logic. Services should never import Express or know about `req`/`res`.
-{% if use_typescript == 'yes' %}
 * **`src/models/`**: TypeScript interfaces and types defining the shape of your data.
-{% else %}
-* **`src/models/`**: Data structures defining the shape of your data.
-{% endif %}
-{% if include_websockets == 'yes' %}
+{% if websockets == 'yes' or websockets == true %}
 * **`src/websockets/`**: Isolated logic for handling real-time Socket.io connections.
 {% endif %}
 
@@ -50,24 +47,25 @@ This project strictly enforces a **Modular 3-Tier Architecture** (also known as 
 Want to add a new `Users` endpoint? Follow this exact pattern:
 
 **1. Define the Data (Optional but recommended)**
-Create `src/models/users.{{ 'ts' if use_typescript == 'yes' else 'js' }}` to define what a user object looks like.
+Create `src/models/users.ts` to define what a user object looks like.
 
 **2. Write the Business Logic (Service)**
-Create `src/services/users.{{ 'ts' if use_typescript == 'yes' else 'js' }}`.
-```javascript
+Create `src/services/users.ts`.
+```typescript
 // Example Service
-export const getUserById = async (id{% if use_typescript == 'yes' %}: string{% endif %}) => {
+export const getUserById = async (id: string) => {
   // Talk to your DB here!
   return { id, name: "Alice" }; 
 };
 ```
 
 **3. Write the Transport Logic (Controller)**
-Create `src/controllers/users.{{ 'ts' if use_typescript == 'yes' else 'js' }}`.
-```javascript
+Create `src/controllers/users.ts`.
+```typescript
+import { Request, Response } from 'express';
 import * as UserService from '../services/users';
 
-export const getUser = async (req, res) => {
+export const getUser = async (req: Request, res: Response) => {
   try {
     const user = await UserService.getUserById(req.params.id);
     res.status(200).json(user);
@@ -78,8 +76,8 @@ export const getUser = async (req, res) => {
 ```
 
 **4. Wire the Route (Router)**
-Create `src/routes/users.{{ 'ts' if use_typescript == 'yes' else 'js' }}`.
-```javascript
+Create `src/routes/users.ts`.
+```typescript
 import { Router } from 'express';
 import { getUser } from '../controllers/users';
 
@@ -89,8 +87,8 @@ export default router;
 ```
 
 **5. Mount the Router**
-Open `src/index.{{ 'ts' if use_typescript == 'yes' else 'js' }}` and mount it:
-```javascript
+Open `src/index.ts` and mount it:
+```typescript
 import usersRouter from './routes/users';
 app.use('/api/users', usersRouter);
 ```
@@ -115,13 +113,13 @@ Based on your scaffolding choices, this project includes several reference imple
 * Demonstrates how to handle request bodies, URL parameters, and async database operations using an ephemeral in-memory dictionary.
 {% endif %}
 
-{% if include_external_api == 'yes' %}
+{% if external_api == 'yes' or external_api == true %}
 ### 3. External API Proxy
 * **Route:** `GET /api/proxy/user/:id`
 * Demonstrates how to make outbound HTTP requests using native `fetch` and handle external API failures.
 {% endif %}
 
-{% if include_websockets == 'yes' %}
+{% if websockets == 'yes' or websockets == true %}
 ### 4. WebSockets (Socket.io)
 * **Endpoint:** `ws://localhost:8080`
 * Demonstrates how to attach Socket.io to an Express server. It currently listens for a `ping` event and emits a `pong` response with the server timestamp.

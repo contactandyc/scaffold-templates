@@ -1,0 +1,25 @@
+kind: git
+url: https://github.com/sqlite/sqlite.git
+branch: master
+shallow: true
+build_steps:
+  # SQLite uses autotools, so we just pass your isolated PREFIX directly to configure
+  - ./configure --prefix=${PREFIX:-/usr/local} CFLAGS="-O2 -DSQLITE_ENABLE_FTS5=1"
+  - make -j"$(nproc)"
+  - ${SUDO}make install
+
+find_package: null
+pkg_config: sqlite3
+link: sqlite3
+
+license_spdx: blessing  # 'blessing' is the official SPDX identifier for SQLite's Public Domain dedication
+attribution: "SQLite by D. Richard Hipp — Public Domain"
+
+notices:
+  - |
+    SQLITE:
+    This software uses SQLite (https://sqlite.org/).
+    The authors of SQLite have explicitly dedicated the code to the public domain.
+    Anyone is free to copy, modify, publish, use, compile, sell, or distribute the
+    original SQLite code, either in source code form or as a compiled binary, for any
+    purpose, commercial or non-commercial, and by any means.

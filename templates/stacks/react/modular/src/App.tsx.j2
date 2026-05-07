@@ -1,0 +1,60 @@
+{#- scaffold-repo: { dest: "src/App.tsx" } -#}
+import { HealthCheck } from './components/HealthCheck';
+import { StoreManager } from './components/StoreManager';
+{% if external_api in ['yes', true, 'true', 'True'] %}
+import { ExternalUser } from './components/ExternalUser';
+{% endif %}
+{% if websockets in ['yes', true, 'true', 'True'] %}
+import { WebSocketPing } from './components/WebSocketPing';
+{% endif %}
+{% if jwt_auth in ['yes', true, 'true', 'True'] %}
+import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { Login } from './pages/Login';
+{% endif %}
+
+function Dashboard() {
+  {% if jwt_auth in ['yes', true, 'true', 'True'] %}
+  const { logout } = useAuth();
+  {% endif %}
+  return (
+    <div style={ { maxWidth: '800px', margin: '0 auto', padding: '20px', fontFamily: 'sans-serif' } }>
+      <div style={ { display: 'flex', justifyContent: 'space-between', alignItems: 'center' } }>
+        <h1>{{ project_title }} Control Panel</h1>
+        {% if jwt_auth in ['yes', true, 'true', 'True'] %}
+        <button onClick={logout} style={ { padding: '8px 16px', background: '#dc3545', color: 'white', border: 'none', borderRadius: '4px' } }>Logout</button>
+        {% endif %}
+      </div>
+      <p>Modular frontend connected to your Express backend.</p>
+
+      <div style={ { display: 'flex', flexDirection: 'column', gap: '20px' } }>
+        <HealthCheck />
+        <StoreManager />
+        {% if external_api in ['yes', true, 'true', 'True'] %}
+        <ExternalUser />
+        {% endif %}
+        {% if websockets in ['yes', true, 'true', 'True'] %}
+        <WebSocketPing />
+        {% endif %}
+      </div>
+    </div>
+  )
+}
+
+{% if jwt_auth in ['yes', true, 'true', 'True'] %}
+function AppContent() {
+  const { token } = useAuth();
+  return token ? <Dashboard /> : <Login />;
+}
+
+export default function App() {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
+  );
+}
+{% else %}
+export default function App() {
+  return <Dashboard />;
+}
+{% endif %}

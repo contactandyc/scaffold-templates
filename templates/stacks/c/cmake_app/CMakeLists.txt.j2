@@ -6,6 +6,11 @@ project({{ project_snake }}
   LANGUAGES {{ language | default("C") }}
 )
 
+if(CMAKE_PREFIX_PATH)
+  include_directories("${CMAKE_PREFIX_PATH}/include")
+  link_directories("${CMAKE_PREFIX_PATH}/lib")
+endif()
+
 # ── Variant selection for consuming dependencies ───────────────
 set(A_BUILD_VARIANT "{{ default_variant | default("static") }}" CACHE STRING
     "Library variant to link against (debug|memory|static|shared)")

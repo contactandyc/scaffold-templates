@@ -1,0 +1,15 @@
+init_prompts:
+  - var: stack_type
+    prompt: "Select Python build system:"
+    choices_from_dir: "stacks/{{ stack }}"
+    exclude: ["base"]
+  - var: PYTHON_VERSION
+    prompt: "Target Python version for the workspace:"
+    default: "3.11"
+
+template_rules:
+  - match: "src/__init__.py"
+    dest: "src/{{ project_snake }}/__init__.py"
+
+  - match: "src/__main__.py"
+    dest: "src/{{ project_snake }}/__main__.py"

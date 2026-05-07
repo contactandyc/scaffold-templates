@@ -1,0 +1,22 @@
+kind: git
+url: https://github.com/lexbor/lexbor.git
+branch: v2.3.0
+shallow: true
+build_steps:
+  - cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=${PREFIX:-/usr/local} -DLEXBOR_BUILD_TESTS=OFF -DLEXBOR_BUILD_EXAMPLES=OFF
+  - cmake --build build -j"$(nproc)"
+  - ${SUDO}cmake --install build
+
+find_package: null
+pkg_config: null
+link: lexbor
+
+license_spdx: Apache-2.0
+attribution: "lexbor by Alexander Borisov — Apache-2.0"
+
+notices:
+  - |
+    LEXBOR HTML PARSER:
+    This software uses the Lexbor HTML parser (https://github.com/lexbor/lexbor).
+    Lexbor is licensed under the Apache License, Version 2.0.
+    Copyright (c) Alexander Borisov.

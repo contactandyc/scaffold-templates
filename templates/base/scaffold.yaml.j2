@@ -8,12 +8,13 @@ date_created: {{ current_date }}
 profile: {{ profile }}
 {% endif %}
 
-{% if registry_url %}
-# ── 1. Scaffolding Engine Source ──
 base_templates:
-  repo: {{ registry_url }}
+  repo: {{ registry_url | default('https://github.com/contactandyc/scaffold-templates.git') }}
   ref: {{ registry_ref | default('main') }}
-{% endif %}
+
+scaffold_repo:
+  repo: https://github.com/contactandyc/scaffold-repo.git
+  ref: main
 
 # ── Dynamic Setup Variables ──
 {% for k, v in prompt_answers.items() %}
@@ -36,6 +37,6 @@ depends_on: []
 
 {% block extra_config %}
 # ── Feature Flags & Overrides ──
-# packages:
+# features:
 #   changie: true
 {% endblock %}

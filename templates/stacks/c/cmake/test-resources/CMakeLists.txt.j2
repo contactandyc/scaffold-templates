@@ -4,6 +4,11 @@ cmake_minimum_required(VERSION {{ cmake_min_version | default("3.20") }})
 
 project({{ subproject_name }} LANGUAGES {{ language | default("C") }})
 
+if(CMAKE_PREFIX_PATH)
+  include_directories("${CMAKE_PREFIX_PATH}/include")
+  link_directories("${CMAKE_PREFIX_PATH}/lib")
+endif()
+
 set(A_BUILD_VARIANT "debug" CACHE STRING
     "Variant to link via {{ project_snake }}::{{ project_snake }} (debug|memory|static|shared)")
 set_property(CACHE A_BUILD_VARIANT PROPERTY STRINGS debug memory static shared)
@@ -27,14 +32,77 @@ set(TEST_EXECUTABLES "")
 
 # ---- Targets ----
 {% for tgt in targets or [] %}
+{% if "fuzz" in tgt.name %}
+# ==============================================================================
+# {{ tgt.name }} Target (Fuzzer)
+# ==============================================================================
+if (CMAKE_C_COMPILER_ID MATCHES "Clang")
+  add_executable({{ tgt.name }}
+{% for s in tgt.sources %}
+    {{ s }}
+{% endfor %}
+{% for ms in library_sources | default([]) %}
+    ${CMAKE_CURRENT_SOURCE_DIR}/../{{ ms }}
+{% endfor %}
+  )
+
+  target_include_directories({{ tgt.name }} PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/../src
+    ${CMAKE_CURRENT_SOURCE_DIR}/../include
+{% for d in tgt.include_dirs | default([]) %}
+    ${CMAKE_CURRENT_SOURCE_DIR}/{{ d }}
+{% endfor %}
+  )
+
+  list(APPEND TEST_EXECUTABLES {{ tgt.name }})
+
+  set_target_properties({{ tgt.name }} PROPERTIES
+    C_STANDARD {{ tgt.c_standard | default(c_standard) | default(23) }}
+    C_STANDARD_REQUIRED YES
+    CXX_STANDARD {{ tgt.cxx_standard | default(cxx_standard) | default(17) }}
+    CXX_STANDARD_REQUIRED YES
+  )
+
+{% for l in link_libraries or [] %}
+  target_link_libraries({{ tgt.name }} PRIVATE {{ l }})
+{% endfor %}
+
+  if(M_LIB)
+    target_link_libraries({{ tgt.name }} PRIVATE ${M_LIB})
+  endif()
+
+  # THE MAGIC FUZZING FLAGS (ASan + UBSan + libFuzzer)
+  target_compile_options({{ tgt.name }} PRIVATE
+    -O1 -g -fsanitize=fuzzer,address,undefined -Wall -Wextra -Wpedantic
+  )
+  target_link_options({{ tgt.name }} PRIVATE
+    -fsanitize=fuzzer,address,undefined
+    -fuse-ld=lld
+  )
+
+  # Add to CTest, but restrict it to run for exactly 2 seconds.
+  add_test(NAME {{ tgt.name }} COMMAND $<TARGET_FILE:{{ tgt.name }}> -max_total_time=2)
+
+else()
+  message(WARNING "Skipping '{{ tgt.name }}' - libFuzzer requires Clang/LLVM.")
+endif()
+
+{% else %}
+# ==============================================================================
+# {{ tgt.name }} Target (Standard Test)
+# ==============================================================================
 add_executable({{ tgt.name }}
 {% for s in tgt.sources %}
   {{ s }}
+{% endfor %}
+{% for ms in library_sources | default([]) %}
+    ${CMAKE_CURRENT_SOURCE_DIR}/../{{ ms }}
 {% endfor %}
 )
 
 target_include_directories({{ tgt.name }} PRIVATE
   ${CMAKE_CURRENT_SOURCE_DIR}/../src
+  ${CMAKE_CURRENT_SOURCE_DIR}/../include
 {% for d in tgt.include_dirs | default([]) %}
   ${CMAKE_CURRENT_SOURCE_DIR}/{{ d }}
 {% endfor %}
@@ -74,6 +142,7 @@ if(A_ENABLE_COVERAGE)
 endif()
 
 add_test(NAME {{ tgt.name }} COMMAND $<TARGET_FILE:{{ tgt.name }}>)
+{% endif %}
 {% endfor %}
 
 enable_testing()
