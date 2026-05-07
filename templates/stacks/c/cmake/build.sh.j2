@@ -36,20 +36,36 @@ case "$COMMAND" in
   bootstrap)
     echo "--- Bootstrapping Hermetic Workspace ---"
 
-    if [ ! -d ".scaffold/venv" ]; then
-        echo "Creating isolated Python environment..."
-        python3 -m venv .scaffold/venv
+    # 1. Fetch the scaffolding engine to disk so it is visible and editable
+    mkdir -p repos
+    if [ ! -d "repos/scaffold-repo" ]; then
+        echo "📦 Fetching scaffold engine into repos/scaffold-repo..."
+        git clone --branch "{{ scaffold_repo.ref if scaffold_repo is defined and scaffold_repo.ref else 'main' }}" \
+            "{{ scaffold_repo.repo if scaffold_repo is defined and scaffold_repo.repo else 'https://github.com/contactandyc/scaffold-repo.git' }}" \
+            "repos/scaffold-repo"
+    else
+        echo "📦 Scaffold engine already exists at repos/scaffold-repo. Leaving untouched."
     fi
-    source .scaffold/venv/bin/activate
-    pip install --upgrade pip -q
 
-    echo "Installing scaffold-repo CLI..."
-    pip install -q "git+{{ scaffold_repo.repo if scaffold_repo is defined and scaffold_repo.repo else 'https://github.com/contactandyc/scaffold-repo.git' }}@{{ scaffold_repo.ref if scaffold_repo is defined and scaffold_repo.ref else 'main' }}"
+    # 2. Isolate the Python scaffolding environment (The Sandbox)
+    if [ ! -d ".scaffold/venv" ]; then
+        echo "Creating isolated Python sandbox..."
+        python3 -m venv .scaffold/venv
+        source .scaffold/venv/bin/activate
+        pip install --upgrade pip -q
 
-    # 1. Generate local hermetic configs & clone dependencies recursively
+        echo "Installing scaffold engine into sandbox..."
+        # This installs the CLI commands strictly into .scaffold/venv/bin
+        # Editable mode (-e) means it runs directly from the repos/scaffold-repo source folder!
+        pip install -q -e repos/scaffold-repo
+    else
+        source .scaffold/venv/bin/activate
+    fi
+
+    # 3. Generate local hermetic configs & clone dependencies recursively
     scaffold-bootstrap
 
-    # 2. Compile the newly cloned dependencies
+    # 4. Compile the newly cloned dependencies
     scaffold-repo --build-deps
 
     echo ""
