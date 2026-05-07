@@ -34,7 +34,6 @@ case "$COMMAND" in
   bootstrap)
     echo "--- Bootstrapping Hermetic Workspace ---"
 
-    # 1. Isolate the Python scaffolding engine
     if [ ! -d ".scaffold/venv" ]; then
         echo "Creating isolated Python environment..."
         python3 -m venv .scaffold/venv
@@ -43,38 +42,12 @@ case "$COMMAND" in
     pip install --upgrade pip -q
 
     echo "Installing scaffold-repo CLI..."
-    # Jinja safely checks if the block exists before accessing its properties
     pip install -q "git+{{ scaffold_repo.repo if scaffold_repo is defined and scaffold_repo.repo else 'https://github.com/contactandyc/scaffold-repo.git' }}@{{ scaffold_repo.ref if scaffold_repo is defined and scaffold_repo.ref else 'main' }}"
 
-    # 2. Workspace Initialization
-    if [ ! -f ".scaffoldrc.yaml" ]; then
-        echo "⚙️  Seeding workspace defaults..."
+    # 1. Generate local hermetic configs & clone dependencies recursively
+    scaffold-bootstrap
 
-        # Safely fetch the base_templates block
-        cat <<EOF > .scaffoldrc.yaml
-workspace_dir: "repos"
-template_registry_url: "{{ base_templates.repo if base_templates is defined and base_templates.repo else 'https://github.com/contactandyc/scaffold-templates.git' }}"
-template_registry_ref: "{{ base_templates.ref if base_templates is defined and base_templates.ref else 'main' }}"
-EOF
-
-        # Check if we have a real human terminal AND we are not in a CI runner
-        if [ -t 0 ] && [ -z "${CI:-}" ]; then
-            echo "⚙️  Launching interactive workspace setup..."
-            scaffold-init
-        else
-            echo "⚙️  Headless environment detected. Auto-configuring hermetic defaults..."
-            # Since the wizard won't run, manually write the scoped bash variables
-            cat <<EOF > .scaffoldrc_{{ stack }}_{{ stack_type }}
-export WORKSPACE_DIR="\$PWD/repos"
-export PREFIX="\$PWD/repos/install"
-export BUILD_TYPE="RelWithDebInfo"
-export BUILD_VARIANT="static"
-EOF
-        fi
-    fi
-
-    # 3. Trigger the Engine
-    echo "🏗️  Resolving dependency graph..."
+    # 2. Compile the newly cloned dependencies
     scaffold-repo --build-deps
 
     echo ""
@@ -114,7 +87,7 @@ EOF
     ;;
 
   *)
-    echo "Usage: $0 [build|install|clean]" >&2
+    echo "Usage: $0 [bootstrap|build|install|clean]" >&2
     exit 1
     ;;
 esac
