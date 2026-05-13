@@ -45,12 +45,32 @@ install(EXPORT {{ project_snake }}Targets
   NAMESPACE {{ project_snake }}::
   DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/{{ project_snake }})
 
+# ---- Package config with dynamic generation ----------------------------------
+set(_CFG_IN "${CMAKE_CURRENT_BINARY_DIR}/config.cmake.in")
+file(WRITE "${_CFG_IN}" [=[
+@PACKAGE_INIT@
+include(CMakeFindDependencyMacro)
+
+set(_deps "@A_BUILD_DEPS@")
+foreach(_dep IN LISTS _deps)
+  if(_dep)
+    find_dependency("${_dep}" REQUIRED)
+  endif()
+endforeach()
+
+include("${CMAKE_CURRENT_LIST_DIR}/{{ project_snake }}Targets.cmake")
+check_required_components({{ project_snake }})
+]=])
+
+set(A_BUILD_DEPS "{{ deps_for_config | default([]) | join(';') }}")
+
 include(CMakePackageConfigHelpers)
 configure_package_config_file(
-  {{ header_only_config_in | default("${CMAKE_CURRENT_SOURCE_DIR}/cmake/Config.cmake.in") }}
-  ${CMAKE_CURRENT_BINARY_DIR}/{{ project_snake }}Config.cmake
+  "${_CFG_IN}"
+  "${CMAKE_CURRENT_BINARY_DIR}/{{ project_snake }}Config.cmake"
   INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/{{ project_snake }}
 )
+
 write_basic_package_version_file(
   ${CMAKE_CURRENT_BINARY_DIR}/{{ project_snake }}ConfigVersion.cmake
   VERSION ${PROJECT_VERSION}

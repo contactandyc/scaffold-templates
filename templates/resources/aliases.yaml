@@ -1,5 +1,6 @@
 andy-curtis:
   - https://github.com/contactandyc/a-bitset-library.git
+  - https://github.com/contactandyc/a-bloom-filter-library.git
   - https://github.com/contactandyc/a-curl-gcloud-plugin.git
   - https://github.com/contactandyc/a-curl-library.git
   - https://github.com/contactandyc/a-curl-openai-plugin.git
