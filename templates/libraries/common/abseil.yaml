@@ -1,0 +1,15 @@
+kind: git
+url: https://github.com/abseil/abseil-cpp.git
+branch: "20240116.2"
+shallow: true
+build_steps:
+  - cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=${PREFIX:-/usr/local} -DCMAKE_CXX_STANDARD=17 -DABSL_ENABLE_INSTALL=ON -DABSL_BUILD_TESTING=OFF
+  - cmake --build build -j"$(nproc)"
+  - ${SUDO}cmake --install build
+
+find_package: "absl CONFIG REQUIRED"
+link: "absl::strings absl::math absl::base" # S2 relies heavily on these
+language: CXX
+
+license_spdx: Apache-2.0
+attribution: "Abseil by Google — Apache-2.0"

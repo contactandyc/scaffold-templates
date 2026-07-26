@@ -4,6 +4,7 @@ branch: master
 shallow: true
 depends_on:
   - system/OpenSSL
+  - common/abseil
 build_steps:
   # S2 strictly requires C++17. We disable tests/examples to prevent compiling massive test suites.
   - cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=${PREFIX:-/usr/local} -DCMAKE_CXX_STANDARD=17 -DBUILD_TESTS=OFF -DBUILD_EXAMPLES=OFF
