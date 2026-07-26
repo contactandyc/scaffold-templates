@@ -1,0 +1,26 @@
+kind: git
+url: https://github.com/google/s2geometry.git
+branch: master
+shallow: true
+depends_on:
+  - system/OpenSSL
+build_steps:
+  # S2 strictly requires C++17. We disable tests/examples to prevent compiling massive test suites.
+  - cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=${PREFIX:-/usr/local} -DCMAKE_CXX_STANDARD=17 -DBUILD_TESTS=OFF -DBUILD_EXAMPLES=OFF
+  - cmake --build build -j"$(nproc)"
+  - ${SUDO}cmake --install build
+
+find_package: null
+pkg_config: null
+link: s2
+language: CXX
+
+license_spdx: Apache-2.0
+attribution: "S2 Geometry by Google — Apache-2.0"
+
+notices:
+  - |
+    S2 GEOMETRY:
+    This software uses S2 Geometry (https://github.com/google/s2geometry).
+    S2 Geometry is licensed under the Apache License, Version 2.0.
+    Copyright 2005-2024 Google Inc.

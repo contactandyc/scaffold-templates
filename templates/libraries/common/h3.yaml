@@ -1,0 +1,22 @@
+kind: git
+url: https://github.com/uber/h3.git
+branch: v4.1.3
+shallow: true
+build_steps:
+  - cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=${PREFIX:-/usr/local} -DBUILD_TESTING=OFF -DENABLE_DOCS=OFF -DENABLE_FORMAT=OFF
+  - cmake --build build -j"$(nproc)"
+  - ${SUDO}cmake --install build
+
+find_package: "h3 CONFIG REQUIRED"
+pkg_config: null
+link: "h3"
+
+license_spdx: Apache-2.0
+attribution: "H3 by Uber Technologies, Inc. — Apache-2.0"
+
+notices:
+  - |
+    H3:
+    This software uses H3 (https://github.com/uber/h3).
+    H3 is licensed under the Apache License, Version 2.0.
+    Copyright 2018-2021 Uber Technologies, Inc.
